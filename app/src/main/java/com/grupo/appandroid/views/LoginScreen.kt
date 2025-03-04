@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.grupo.appandroid.R
 import com.grupo.appandroid.components.CustomTextField
 import com.grupo.appandroid.ui.theme.AmberPrimary
@@ -30,8 +31,7 @@ import com.grupo.appandroid.ui.theme.TextGray
 import com.grupo.appandroid.ui.theme.TextWhite
 
 @Composable
-fun LoginScreen(
-) {
+fun LoginScreen(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -104,7 +104,8 @@ fun LoginScreen(
                 color = TextGray,
                 fontSize = 14.sp,
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .clickable { navController.navigate("registration") },
                 textAlign = TextAlign.Center
             )
 
