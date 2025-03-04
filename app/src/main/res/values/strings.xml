@@ -1,3 +1,27 @@
 <resources>
     <string name="app_name">AppAndroid</string>
+    <string name="fullName">Full Name *</string>
+    <string name="phone">Phone *</string>
+    <string name="email">E-mail *</string>
+    <string name="password">Password *</string>
+    <string name="confirm_password">Confirm your password *</string>
+    <string name="enter">Enter</string>
+    <string name="document">Document *</string>
+    <string name="location">Location *</string>
+    <string name="skills">Main Skills *</string>
+    <string name="biography">Enter your\'s biography</string>
+    <string name="academy_level">Level</string>
+    <string name="academy_course">Course</string>
+    <string name="academy_institution">Institution</string>
+    <string name="academy_year_complete">Year of completion</string>
+    <string name="company_name">Company name *</string>
+    <string name="academy_background">Academy Background</string>
+    <string name="description">Description</string>
+    <string name="industry">Industry</string>
+    <string name="company_description">Company Description</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="sign_in">Sign In</string>
+    <string name="have_an_account">Have an Account?</string>
+    <string name="people">People</string>
+    <string name="company">Company</string>
 </resources>
