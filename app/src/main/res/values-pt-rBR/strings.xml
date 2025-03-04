@@ -25,4 +25,9 @@
     <string name="have_an_account">Você possui uma conta?</string>
     <string name="people">Pessoa</string>
     <string name="company">Empresa</string>
+    <!--  STRINGS DA TELA DE LOGIN  -->
+    <string name="welcome_back">Bem vindo de volta!</string>
+    <string name="forget_password">Esqueceu sua Senha? Clique aqui!</string>
+    <string name="dont_have_account">Não tem uma conta? Cadastre-se</string>
+    <string name="login">LOGIN</string>
 </resources>

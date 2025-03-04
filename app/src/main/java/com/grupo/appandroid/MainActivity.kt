@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.grupo.appandroid.ui.theme.RegistrationAppTheme
+import com.grupo.appandroid.views.LoginScreen
 import com.grupo.appandroid.views.RegistrationScreen
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -24,7 +25,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             RegistrationAppTheme {
-                RegistrationScreen()
+                LoginScreen()
             }
         }
     }
