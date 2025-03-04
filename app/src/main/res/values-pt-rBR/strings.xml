@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AppAndroid</string>
+    <string name="fullName">Nome Completo *</string>
+    <string name="phone">Telefone *</string>
+    <string name="email">E-mail *</string>
+    <string name="password">Senha *</string>
+    <string name="confirm_password">Confirme sua senha *</string>
+    <string name="enter">Entrar</string>
+    <string name="document">Documento *</string>
+    <string name="location">Localização *</string>
+    <string name="skills">Habilidades *</string>
+    <string name="biography">Sua Biografia</string>
+    <string name="academy_level">Nível</string>
+    <string name="academy_course">Curso</string>
+    <string name="academy_institution">Instituição</string>
+    <string name="academy_year_complete">Último Ano</string>
+    <string name="company_name">Nome da Empresa *</string>
+    <string name="academy_background">Nível Academico</string>
+    <string name="description">Descrição</string>
+    <string name="industry">Industria</string>
+    <string name="company_description">Descrição da Empresa</string>
+    <string name="sign_up">Registrar</string>
+    <string name="sign_in">Logar</string>
+    <string name="have_an_account">Você possui uma conta?</string>
+    <string name="people">Pessoa</string>
+    <string name="company">Empresa</string>
+</resources>
