@@ -1,6 +1,7 @@
 package com.grupo.appandroid.views
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -31,6 +32,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.grupo.appandroid.R
 import com.grupo.appandroid.components.CustomTextArea
 import com.grupo.appandroid.components.CustomTextField
@@ -42,7 +44,7 @@ import com.grupo.appandroid.ui.theme.TextGray
 import com.grupo.appandroid.ui.theme.TextWhite
 
 @Composable
-fun RegistrationScreen() {
+fun RegistrationScreen(navController: NavController) {
     var selectedTabIndex by remember { mutableStateOf(0) }
 
     Box(
@@ -58,10 +60,9 @@ fun RegistrationScreen() {
                 .padding(top = 60.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
             // Sign Up Title
             Text(
-                text = stringResource(id = R.string.sign_up ),
+                text = stringResource(id = R.string.sign_up),
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextWhite,
@@ -70,8 +71,8 @@ fun RegistrationScreen() {
 
             // Tabs
             val tabs = listOf(
-                TabItem(stringResource(id = R.string.people ), Icons.Default.Person),
-                TabItem(stringResource(id = R.string.company ), Icons.Default.Home)
+                TabItem(stringResource(id = R.string.people), Icons.Default.Person),
+                TabItem(stringResource(id = R.string.company), Icons.Default.Home)
             )
 
             RegistrationTabRow(
@@ -84,16 +85,16 @@ fun RegistrationScreen() {
 
             // Form content based on selected tab
             if (selectedTabIndex == 0) {
-                PeopleRegistrationForm()
+                PeopleRegistrationForm(navController)
             } else {
-                CompanyRegistrationForm()
+                CompanyRegistrationForm(navController)
             }
         }
     }
 }
 
 @Composable
-fun PeopleRegistrationForm() {
+fun PeopleRegistrationForm(navController: NavController) {
     Column(modifier = Modifier.fillMaxWidth()) {
         CustomTextField(label = stringResource(id = R.string.fullName))
         CustomTextField(label = stringResource(id = R.string.email), keyboardType = KeyboardType.Email)
@@ -123,12 +124,12 @@ fun PeopleRegistrationForm() {
 
         SignUpButton()
 
-        SignInText()
+        SignInText(navController)
     }
 }
 
 @Composable
-fun CompanyRegistrationForm() {
+fun CompanyRegistrationForm(navController: NavController) {
     Column(modifier = Modifier.fillMaxWidth()) {
         CustomTextField(label = stringResource(id = R.string.company_name))
         CustomTextField(label = stringResource(id = R.string.email), keyboardType = KeyboardType.Email)
@@ -148,7 +149,7 @@ fun CompanyRegistrationForm() {
 
         SignUpButton()
 
-        SignInText()
+        SignInText(navController)
     }
 }
 
@@ -173,7 +174,7 @@ fun SignUpButton() {
 }
 
 @Composable
-fun SignInText() {
+fun SignInText(navController: NavController) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth()
@@ -181,9 +182,10 @@ fun SignInText() {
         Text(
             text = stringResource(id = R.string.have_an_account),
             color = TextGray,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            modifier = Modifier.clickable { navController.navigate("login") }
         )
-        TextButton(onClick = { /* TODO: Navigate to sign in */ }) {
+        TextButton(onClick = { navController.navigate("login") }) {
             Text(
                 text = stringResource(id = R.string.sign_in),
                 color = TextWhite,
