@@ -13,6 +13,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.grupo.appandroid.ui.theme.RegistrationAppTheme
+import com.grupo.appandroid.views.CandidatesScreen
 import com.grupo.appandroid.viewmodels.LoginViewModel
 import com.grupo.appandroid.viewmodels.RegistrationViewModel
 import com.grupo.appandroid.views.LoginScreen
@@ -45,7 +46,7 @@ class MainActivity : ComponentActivity() {
                         enterTransition = { fadeIn(animationSpec = tween(500)) },
                         exitTransition = { fadeOut(animationSpec = tween(500)) }
                     ) {
-                        LoginScreen(navController, loginViewModel = LoginViewModel())
+                        CandidatesScreen()
                     }
                     composable(
                         route = "registration",

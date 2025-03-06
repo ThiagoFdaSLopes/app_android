@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">AppAndroid</string>
+    <string name="app_name">Emprega+</string>
     <string name="fullName">Nome Completo *</string>
     <string name="phone">Telefone *</string>
     <string name="email">E-mail *</string>
@@ -30,4 +30,14 @@
     <string name="forget_password">Esqueceu sua Senha? Clique aqui!</string>
     <string name="dont_have_account">Não tem uma conta? Cadastre-se</string>
     <string name="login">LOGIN</string>
+    <!--  STRINGS DO COMPONENTE TopHeader  -->
+    <string name="location_select">Localização ▼</string>
+    <string name="modality">Modalidade ▼</string>
+    <string name="search">Pesquisar...</string>
+    <!--  STRINGS DO COMPONENTE CandidateCard   -->
+    <string name="see_more">Ver Mais</string>
+    <string name="name_candidate_card">Nome</string>
+    <string name="age_candidate_card">Idade</string>
+    <string name="area_candidate_card">Área</string>
+    <string name="experience_candidate_card">Experiência</string>
 </resources>

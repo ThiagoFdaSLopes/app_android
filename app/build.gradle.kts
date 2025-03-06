@@ -68,6 +68,7 @@ dependencies {
     //noinspection KaptUsageInsteadOfKsp
     kapt(libs.androidx.room.compiler)
 
+
     // Dependencia LiveData
     implementation(libs.androidx.runtime.livedata)
 }
