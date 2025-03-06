@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    // Implementação para banco de dados
+    id("kotlin-kapt")
 }
 
 android {
@@ -59,5 +61,13 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
     // Implementação do navigation
     implementation(libs.androidx.navigation.compose)
+    // Implementação banco de dados
+    // Dependência principal do Room
+    implementation(libs.androidx.room.runtime)
+    // Dependência para gerar código (processamento de anotações)
+    //noinspection KaptUsageInsteadOfKsp
+    kapt(libs.androidx.room.compiler)
 
+    // Dependencia LiveData
+    implementation(libs.androidx.runtime.livedata)
 }
