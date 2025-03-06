@@ -29,9 +29,10 @@ import com.grupo.appandroid.ui.theme.AmberPrimary
 import com.grupo.appandroid.ui.theme.DarkBackground
 import com.grupo.appandroid.ui.theme.TextGray
 import com.grupo.appandroid.ui.theme.TextWhite
+import com.grupo.appandroid.viewmodels.LoginViewModel
 
 @Composable
-fun LoginScreen(navController: NavController) {
+fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -62,13 +63,17 @@ fun LoginScreen(navController: NavController) {
 
             CustomTextField(
                 label = stringResource(id = R.string.email),
-                keyboardType = androidx.compose.ui.text.input.KeyboardType.Email
+                keyboardType = androidx.compose.ui.text.input.KeyboardType.Email,
+                value = loginViewModel.email.value,
+                onValueChange = { email -> loginViewModel.email.value = email }
             )
 
             CustomTextField(
                 label = stringResource(id = R.string.password),
                 isPassword = true,
-                keyboardType = androidx.compose.ui.text.input.KeyboardType.Password
+                keyboardType = androidx.compose.ui.text.input.KeyboardType.Password,
+                value = loginViewModel.password.value,
+                onValueChange = { password -> loginViewModel.password.value = password }
             )
 
             Text(
