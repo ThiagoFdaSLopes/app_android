@@ -9,7 +9,7 @@
     <string name="document">Document *</string>
     <string name="location">Location *</string>
     <string name="skills">Main Skills *</string>
-    <string name="biography">Enter your\'s biography</string>
+    <string name="biography">Enter your\'s biography *</string>
     <string name="academy_level">Level</string>
     <string name="academy_course">Course</string>
     <string name="academy_institution">Institution</string>
