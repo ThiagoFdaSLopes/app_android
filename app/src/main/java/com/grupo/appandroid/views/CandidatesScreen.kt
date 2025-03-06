@@ -53,6 +53,7 @@ fun CandidatesScreen(modifier: Modifier = Modifier) {
                         location = candidate.location,
                         area = candidate.area,
                         experienceTime = candidate.experienceTime
+
                     )
                 }
             }
