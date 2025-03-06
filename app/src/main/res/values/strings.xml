@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">AppAndroid</string>
+    <string name="app_name">Emprega+</string>
     <string name="fullName">Full Name *</string>
     <string name="phone">Phone *</string>
     <string name="email">E-mail *</string>
@@ -29,4 +29,17 @@
     <string name="forget_password">Forget your password? Click here</string>
     <string name="dont_have_account">Don\'t have an account? Sign Up</string>
     <string name="login">LOGIN</string>
+    <!--  STRINGS DO COMPONENTE TOPHEADER  -->
+    <string name="location_select">Location ▼</string>
+    <string name="modality">Modality ▼</string>
+    <string name="search">Search...</string>
+    <!--  STRINGS DO COMPONENTE CANDIDATECARD   -->
+    <string name="see_more">See More</string>
+    <string name="name_candidate_card">Name</string>
+    <string name="age_candidate_card">Age</string>
+    <string name="area_candidate_card">Area</string>
+    <string name="experience_candidate_card">Experience</string>
+
+
+
 </resources>
