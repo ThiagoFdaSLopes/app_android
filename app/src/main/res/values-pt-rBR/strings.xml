@@ -10,7 +10,7 @@
     <string name="document">Documento *</string>
     <string name="location">Localização *</string>
     <string name="skills">Habilidades *</string>
-    <string name="biography">Sua Biografia</string>
+    <string name="biography">Sua Biografia *</string>
     <string name="academy_level">Nível</string>
     <string name="academy_course">Curso</string>
     <string name="academy_institution">Instituição</string>
