@@ -1,5 +1,6 @@
 package com.grupo.appandroid.views
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,8 +15,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -25,6 +29,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.grupo.appandroid.R
 import com.grupo.appandroid.components.CustomTextField
+import com.grupo.appandroid.database.repository.CompanyRepository
+import com.grupo.appandroid.database.repository.UserRepository
 import com.grupo.appandroid.ui.theme.AmberPrimary
 import com.grupo.appandroid.ui.theme.DarkBackground
 import com.grupo.appandroid.ui.theme.TextGray
@@ -33,6 +39,12 @@ import com.grupo.appandroid.viewmodels.LoginViewModel
 
 @Composable
 fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
+    val context = LocalContext.current
+    val userRepository = UserRepository(context)
+    val companyRepository = CompanyRepository(context)
+    val errorMessage = remember { mutableStateOf("") }
+    val prefs = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -76,6 +88,15 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
                 onValueChange = { password -> loginViewModel.password.value = password }
             )
 
+            if (errorMessage.value.isNotEmpty()) {
+                Text(
+                    text = errorMessage.value,
+                    color = TextGray,
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
+
             Text(
                 text = stringResource(id = R.string.forget_password),
                 color = TextGray,
@@ -87,7 +108,35 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
             )
 
             Button(
-                onClick = { },
+                onClick = {
+                    val email = loginViewModel.email.value
+                    val password = loginViewModel.password.value
+
+                    // Verifica se é um usuário
+                    val user = userRepository.findUserByEmailAndPassword(email, password)
+                    if (user != null) {
+                        prefs.edit()
+                            .putString("loggedInEmail", email)
+                            .putString("loginType", "user")
+                            .apply()
+                        navController.navigate("home")
+                        return@Button
+                    }
+
+                    // Verifica se é uma empresa
+                    val company = companyRepository.findCompanyByEmailAndPassword(email, password)
+                    if (company != null) {
+                        prefs.edit()
+                            .putString("loggedInEmail", email)
+                            .putString("loginType", "company")
+                            .apply()
+                        navController.navigate("home")
+                        return@Button
+                    }
+
+                    // Se não for nenhum dos dois, exibe erro
+                    errorMessage.value = "Email ou senha inválidos"
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 16.dp)

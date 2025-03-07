@@ -55,7 +55,13 @@ class MainActivity : ComponentActivity() {
                     ) {
                         RegistrationScreen(navController = navController, viewModel = RegistrationViewModel())
                     }
-
+                    composable(
+                        route = "home",
+                        enterTransition = { fadeIn(animationSpec = tween(500)) },
+                        exitTransition = { fadeOut(animationSpec = tween(500)) }
+                    ) {
+                        CandidatesScreen()
+                    }
                 }
             }
         }

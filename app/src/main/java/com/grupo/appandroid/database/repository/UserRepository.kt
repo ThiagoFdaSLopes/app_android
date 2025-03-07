@@ -28,4 +28,11 @@ class UserRepository(context: Context) {
         return db.searchUserById(id)
     }
 
+    // Nova função para login
+    fun findUserByEmailAndPassword(email: String, password: String): User? {
+        return db.findUserByEmailAndPassword(email, password)
+    }
+    fun findUserByEmail(email: String): User? {
+        return db.findUserByEmail(email)
+    }
 }
