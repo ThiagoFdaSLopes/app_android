@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.grupo.appandroid.model.Company
+import com.grupo.appandroid.model.User
 
 @Dao
 interface CompanyDAO {
@@ -24,4 +25,7 @@ interface CompanyDAO {
 
     @Query("SELECT * FROM company ORDER BY companyName ASC")
     fun findAllCompany(): List<Company>
+
+    @Query("SELECT * FROM company WHERE email = :email AND password = :password LIMIT 1")
+    fun findCompanyByEmailAndPassword(email: String, password: String): Company?
 }

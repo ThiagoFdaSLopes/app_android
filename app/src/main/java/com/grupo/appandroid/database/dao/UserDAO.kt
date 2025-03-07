@@ -25,4 +25,9 @@ interface UserDAO {
     @Query("SELECT * FROM user ORDER BY name ASC")
     fun findAllUsers(): List<User>
 
+    @Query("SELECT * FROM user WHERE email = :email AND password = :password LIMIT 1")
+    fun findUserByEmailAndPassword(email: String, password: String): User?
+
+    @Query("SELECT * FROM user WHERE email = :email LIMIT 1")
+    fun findUserByEmail(email: String): User?
 }

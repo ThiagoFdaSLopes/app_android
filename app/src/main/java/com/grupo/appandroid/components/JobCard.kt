@@ -9,37 +9,30 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.grupo.appandroid.R
-import java.util.Locale
 
 @Composable
-fun CandidateCard(
-    name: String,
-    age: Int,
+fun JobCard(
+    title: String,
+    company: String,
     location: String,
-    area: String,
-    experienceTime: String,
-    isCompanyLogin: Boolean
+    modality: String,
+    salary: String
 ) {
     Box(
         modifier = Modifier
@@ -59,9 +52,8 @@ fun CandidateCard(
                 Text(
                     text = "",
                     modifier = Modifier
-                        .size(80.dp)
-                        .clip(CircleShape)
-                        .background(Color.DarkGray)
+                        .size(60.dp)
+                        .background(Color.DarkGray, shape = RoundedCornerShape(8.dp))
                         .padding(16.dp),
                     color = Color.White,
                     fontSize = 12.sp,
@@ -77,81 +69,48 @@ fun CandidateCard(
                 Text(
                     text = buildAnnotatedString {
                         withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("${stringResource(id = R.string.name_candidate_card)}: ")
+                            append("Título: ")
                         }
-                        append(name)
+                        append(title)
                     },
                     fontSize = 16.sp
                 )
                 Text(
                     text = buildAnnotatedString {
                         withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("${stringResource(id = R.string.age_candidate_card)}: ")
+                            append("Empresa: ")
                         }
-                        append(age.toString())
-                    },
-                    fontSize = 14.sp
-                )
-
-                Text(
-                    text = buildAnnotatedString {
-                        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("${stringResource(id = R.string.area_candidate_card)}: ")
-                        }
-                        append(area)
+                        append(company)
                     },
                     fontSize = 14.sp
                 )
                 Text(
                     text = buildAnnotatedString {
                         withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("${stringResource(id = R.string.experience_candidate_card)}: ")
+                            append("${stringResource(id = R.string.location)}: ")
                         }
-                        append(experienceTime)
+                        append(location)
                     },
                     fontSize = 14.sp
                 )
-
-                // Ícones adicionais apenas para login de empresa
-                if (isCompanyLogin) {
-                    Row(
-                        modifier = Modifier
-                            .padding(top = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        // Ícone e texto para Location
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.pin), // Substitua pelo seu ícone
-                                contentDescription = "Modalidade",
-                                modifier = Modifier.size(20.dp),
-                                tint = Color.Gray
-                            )
-                            Text(
-                                text = location,
-                                fontSize = 12.sp,
-                                color = Color.Gray,
-                                modifier = Modifier.padding(start = 4.dp)
-                            )
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("Modalidade: ")
                         }
-
-                        // Ícone e texto para Experiência
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.briefcase), // Substitua pelo seu ícone
-                                contentDescription = "Tempo",
-                                modifier = Modifier.size(20.dp),
-                                tint = Color.Gray
-                            )
-                            Text(
-                                text = experienceTime,
-                                fontSize = 12.sp,
-                                color = Color.Gray,
-                                modifier = Modifier.padding(start = 4.dp)
-                            )
+                        append(modality)
+                    },
+                    fontSize = 14.sp
+                )
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("Salário: ")
                         }
-                    }
-                }
+                        append(salary)
+                    },
+                    fontSize = 14.sp
+                )
             }
         }
 
