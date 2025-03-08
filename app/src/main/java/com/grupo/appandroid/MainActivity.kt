@@ -9,22 +9,24 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.grupo.appandroid.model.CandidateData
-import com.grupo.appandroid.model.JobData
+import androidx.navigation.navArgument
+import com.grupo.appandroid.model.Company
+import com.grupo.appandroid.model.User
 import com.grupo.appandroid.ui.theme.RegistrationAppTheme
 import com.grupo.appandroid.views.CandidatesScreen
 import com.grupo.appandroid.viewmodels.LoginViewModel
 import com.grupo.appandroid.viewmodels.RegistrationViewModel
-import com.grupo.appandroid.views.CandidateDetailScreen
-import com.grupo.appandroid.views.JobDetailScreen
+import com.grupo.appandroid.views.CompanyDetailScreen
 import com.grupo.appandroid.views.LoginScreen
 import com.grupo.appandroid.views.RegistrationScreen
+import com.grupo.appandroid.views.UserDetailScreen
+import com.grupo.appandroid.views.JobDetailScreen
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.net.URL
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 
@@ -69,25 +71,91 @@ class MainActivity : ComponentActivity() {
                     ) {
                         CandidatesScreen(navController = navController)
                     }
-                    composable("candidateDetail/{name}/{age}/{location}/{area}/{experience}") { backStackEntry ->
+                    composable(
+                        "userDetail/{userCode}/{name}/{email}/{phone}/{location}/{skills}/{description}"
+                    ) { backStackEntry ->
+                        val userCode = backStackEntry.arguments?.getString("userCode")?.toLongOrNull() ?: 0L
                         val name = URLDecoder.decode(backStackEntry.arguments?.getString("name") ?: "", StandardCharsets.UTF_8.toString())
-                        val age = backStackEntry.arguments?.getString("age")?.toInt() ?: 0
+                        val email = URLDecoder.decode(backStackEntry.arguments?.getString("email") ?: "", StandardCharsets.UTF_8.toString())
+                        val phone = URLDecoder.decode(backStackEntry.arguments?.getString("phone") ?: "", StandardCharsets.UTF_8.toString())
                         val location = URLDecoder.decode(backStackEntry.arguments?.getString("location") ?: "", StandardCharsets.UTF_8.toString())
-                        val area = URLDecoder.decode(backStackEntry.arguments?.getString("area") ?: "", StandardCharsets.UTF_8.toString())
-                        val experience = URLDecoder.decode(backStackEntry.arguments?.getString("experience") ?: "", StandardCharsets.UTF_8.toString())
-                        CandidateDetailScreen(
-                            candidate = CandidateData(name, age, location, area, experience),
+                        val skills = URLDecoder.decode(backStackEntry.arguments?.getString("skills") ?: "", StandardCharsets.UTF_8.toString())
+                        val description = URLDecoder.decode(backStackEntry.arguments?.getString("description") ?: "", StandardCharsets.UTF_8.toString())
+
+                        val user = User(
+                            userCode = userCode,
+                            name = name,
+                            email = email,
+                            phone = phone,
+                            password = "", // Not needed for display
+                            document = "", // Not needed for display
+                            location = location,
+                            skills = skills,
+                            description = description,
+                            academyLevel = null,
+                            academyCourse = null,
+                            academyInstitution = null,
+                            academyLastYear = null
+                        )
+                        UserDetailScreen(
+                            user = user,
                             navController = navController
                         )
                     }
-                    composable("jobDetail/{title}/{company}/{location}/{modality}/{salary}") { backStackEntry ->
+                    // Fix candidate details route
+                    composable(
+                        route = "candidateDetail/{name}/{age}/{location}/{role}/{experience}",
+                        arguments = listOf(
+                            navArgument("name") { type = NavType.StringType },
+                            navArgument("age") { type = NavType.StringType },
+                            navArgument("location") { type = NavType.StringType },
+                            navArgument("role") { type = NavType.StringType },
+                            navArgument("experience") { type = NavType.StringType }
+                        )
+                    ) { backStackEntry ->
+                        val name = URLDecoder.decode( backStackEntry.arguments?.getString("name") ?: "")
+                        val age = URLDecoder.decode((backStackEntry.arguments?.getString("age")?.toIntOrNull() ?: 0).toString())
+                        val location = URLDecoder.decode(backStackEntry.arguments?.getString("location") ?: "")
+                        val role =URLDecoder.decode(backStackEntry.arguments?.getString("role") ?: "")
+                        val experience = URLDecoder.decode(backStackEntry.arguments?.getString("experience") ?: "")
+
+                        // Create a User object with the required fields
+                        val user = User(
+                            userCode = 0L, // Default value
+                            name = name,
+                            email = "", // Not needed for display
+                            phone = "",
+                            password = "",
+                            document = "",
+                            location = location,
+                            skills = role,
+                            description = "Experience: $experience",
+                            academyLevel = null,
+                            academyCourse = null,
+                            academyInstitution = null,
+                            academyLastYear = null
+                        )
+
+                        UserDetailScreen(
+                            user = user,
+                            navController = navController
+                        )
+                    }
+                    composable(
+                        "jobDetail/{title}/{company}/{location}/{modality}/{salary}"
+                    ) { backStackEntry ->
                         val title = URLDecoder.decode(backStackEntry.arguments?.getString("title") ?: "", StandardCharsets.UTF_8.toString())
                         val company = URLDecoder.decode(backStackEntry.arguments?.getString("company") ?: "", StandardCharsets.UTF_8.toString())
                         val location = URLDecoder.decode(backStackEntry.arguments?.getString("location") ?: "", StandardCharsets.UTF_8.toString())
                         val modality = URLDecoder.decode(backStackEntry.arguments?.getString("modality") ?: "", StandardCharsets.UTF_8.toString())
                         val salary = URLDecoder.decode(backStackEntry.arguments?.getString("salary") ?: "", StandardCharsets.UTF_8.toString())
+
                         JobDetailScreen(
-                            job = JobData(title, company, location, modality, salary),
+                            title = title,
+                            company = company,
+                            location = location,
+                            modality = modality,
+                            salary = salary,
                             navController = navController
                         )
                     }
