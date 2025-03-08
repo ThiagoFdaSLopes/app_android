@@ -4,19 +4,11 @@ import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -31,10 +23,7 @@ import com.grupo.appandroid.R
 import com.grupo.appandroid.components.CustomTextField
 import com.grupo.appandroid.database.repository.CompanyRepository
 import com.grupo.appandroid.database.repository.UserRepository
-import com.grupo.appandroid.ui.theme.AmberPrimary
-import com.grupo.appandroid.ui.theme.DarkBackground
-import com.grupo.appandroid.ui.theme.TextGray
-import com.grupo.appandroid.ui.theme.TextWhite
+import com.grupo.appandroid.ui.theme.*
 import com.grupo.appandroid.viewmodels.LoginViewModel
 
 @Composable
@@ -42,8 +31,25 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
     val context = LocalContext.current
     val userRepository = UserRepository(context)
     val companyRepository = CompanyRepository(context)
-    val errorMessage = remember { mutableStateOf("") }
     val prefs = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
+
+    // Observe states
+    val email = loginViewModel.email.observeAsState("")
+    val password = loginViewModel.password.observeAsState("")
+    val isLoading = loginViewModel.isLoading.observeAsState(initial = false)
+    val errorMessage = loginViewModel.errorMessage.observeAsState("")
+    val loginSuccess = loginViewModel.loginSuccess.observeAsState()
+
+    // Handle login success
+    loginSuccess.value?.let { result ->
+        LaunchedEffect (result) {
+            prefs.edit()
+                .putString("loggedInEmail", result.email)
+                .putString("loginType", result.type)
+                .apply()
+            navController.navigate("home")
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -76,16 +82,16 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
             CustomTextField(
                 label = stringResource(id = R.string.email),
                 keyboardType = androidx.compose.ui.text.input.KeyboardType.Email,
-                value = loginViewModel.email.value,
-                onValueChange = { email -> loginViewModel.email.value = email }
+                value = email.value,
+                onValueChange = { loginViewModel.updateEmail(it) }
             )
 
             CustomTextField(
                 label = stringResource(id = R.string.password),
                 isPassword = true,
                 keyboardType = androidx.compose.ui.text.input.KeyboardType.Password,
-                value = loginViewModel.password.value,
-                onValueChange = { password -> loginViewModel.password.value = password }
+                value = password.value,
+                onValueChange = { loginViewModel.updatePassword(it) }
             )
 
             if (errorMessage.value.isNotEmpty()) {
@@ -109,34 +115,9 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
 
             Button(
                 onClick = {
-                    val email = loginViewModel.email.value
-                    val password = loginViewModel.password.value
-
-                    // Verifica se é um usuário
-                    val user = userRepository.findUserByEmailAndPassword(email, password)
-                    if (user != null) {
-                        prefs.edit()
-                            .putString("loggedInEmail", email)
-                            .putString("loginType", "user")
-                            .apply()
-                        navController.navigate("home")
-                        return@Button
-                    }
-
-                    // Verifica se é uma empresa
-                    val company = companyRepository.findCompanyByEmailAndPassword(email, password)
-                    if (company != null) {
-                        prefs.edit()
-                            .putString("loggedInEmail", email)
-                            .putString("loginType", "company")
-                            .apply()
-                        navController.navigate("home")
-                        return@Button
-                    }
-
-                    // Se não for nenhum dos dois, exibe erro
-                    errorMessage.value = "Email ou senha inválidos"
+                    loginViewModel.login(userRepository, companyRepository)
                 },
+                enabled = !isLoading.value,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 16.dp)
@@ -146,11 +127,18 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
                     contentColor = TextWhite
                 )
             ) {
-                Text(
-                    text = stringResource(id = R.string.login),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                if (isLoading.value) {
+                    CircularProgressIndicator(
+                        color = TextWhite,
+                        modifier = Modifier.size(24.dp)
+                    )
+                } else {
+                    Text(
+                        text = stringResource(id = R.string.login),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
 
             Text(
