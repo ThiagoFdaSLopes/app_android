@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavController
 import com.grupo.appandroid.components.CandidateCard
 import com.grupo.appandroid.components.JobCard
 import com.grupo.appandroid.componentes.NavigationBar
@@ -21,9 +22,14 @@ import com.grupo.appandroid.components.TopHeader
 import com.grupo.appandroid.model.CandidateData
 import com.grupo.appandroid.model.JobData
 import com.grupo.appandroid.ui.theme.DarkBackground
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 @Composable
-fun CandidatesScreen(modifier: Modifier = Modifier) {
+fun CandidatesScreen(
+    navController: NavController,
+    modifier: Modifier = Modifier
+) {
     val context = LocalContext.current
     val prefs = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
     val isCompanyLogin = prefs.getString("loginType", null) == "company"
@@ -63,7 +69,6 @@ fun CandidatesScreen(modifier: Modifier = Modifier) {
                 )
 
                 if (isCompanyLogin) {
-                    // Mostrar candidatos para empresas
                     items(candidates) { candidate ->
                         CandidateCard(
                             name = candidate.name,
@@ -71,18 +76,38 @@ fun CandidatesScreen(modifier: Modifier = Modifier) {
                             location = candidate.location,
                             area = candidate.area,
                             experienceTime = candidate.experienceTime,
-                            isCompanyLogin = isCompanyLogin
+                            isCompanyLogin = isCompanyLogin,
+                            onClick = {
+                                val encodedName = URLEncoder.encode(candidate.name, StandardCharsets.UTF_8.toString())
+                                val encodedLocation = URLEncoder.encode(candidate.location, StandardCharsets.UTF_8.toString())
+                                val encodedArea = URLEncoder.encode(candidate.area, StandardCharsets.UTF_8.toString())
+                                val encodedExperienceTime = URLEncoder.encode(candidate.experienceTime, StandardCharsets.UTF_8.toString())
+
+                                navController.navigate(
+                                    "candidateDetail/$encodedName/${candidate.age}/$encodedLocation/$encodedArea/$encodedExperienceTime"
+                                )
+                            }
                         )
                     }
                 } else {
-                    // Mostrar vagas para usuários
                     items(vagas) { vaga ->
                         JobCard(
                             title = vaga.title,
                             company = vaga.company,
                             location = vaga.location,
                             modality = vaga.modality,
-                            salary = vaga.salary
+                            salary = vaga.salary,
+                            onClick = {
+                                val encodedTitle = URLEncoder.encode(vaga.title, StandardCharsets.UTF_8.toString())
+                                val encodedCompany = URLEncoder.encode(vaga.company, StandardCharsets.UTF_8.toString())
+                                val encodedLocation = URLEncoder.encode(vaga.location, StandardCharsets.UTF_8.toString())
+                                val encodedModality = URLEncoder.encode(vaga.modality, StandardCharsets.UTF_8.toString())
+                                val encodedSalary = URLEncoder.encode(vaga.salary, StandardCharsets.UTF_8.toString())
+
+                                navController.navigate(
+                                    "jobDetail/$encodedTitle/$encodedCompany/$encodedLocation/$encodedModality/$encodedSalary"
+                                )
+                            }
                         )
                     }
                 }

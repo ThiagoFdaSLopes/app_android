@@ -32,12 +32,14 @@ fun JobCard(
     company: String,
     location: String,
     modality: String,
-    salary: String
+    salary: String,
+    onClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White, shape = RoundedCornerShape(8.dp))
+            .clickable { onClick() }
             .padding(16.dp)
     ) {
         Row(

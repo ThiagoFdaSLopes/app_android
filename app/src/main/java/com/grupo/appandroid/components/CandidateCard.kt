@@ -39,12 +39,14 @@ fun CandidateCard(
     location: String,
     area: String,
     experienceTime: String,
-    isCompanyLogin: Boolean
+    isCompanyLogin: Boolean,
+    onClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White, shape = RoundedCornerShape(8.dp))
+            .clickable { onClick() }
             .padding(16.dp)
     ) {
         Row(
