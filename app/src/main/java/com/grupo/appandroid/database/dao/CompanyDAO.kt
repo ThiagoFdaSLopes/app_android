@@ -28,4 +28,7 @@ interface CompanyDAO {
 
     @Query("SELECT * FROM company WHERE email = :email AND password = :password LIMIT 1")
     fun findCompanyByEmailAndPassword(email: String, password: String): Company?
+
+    @Insert
+    fun insertAll(companies: List<Company>)
 }

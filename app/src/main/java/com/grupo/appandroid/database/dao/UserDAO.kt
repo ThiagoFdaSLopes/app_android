@@ -30,4 +30,9 @@ interface UserDAO {
 
     @Query("SELECT * FROM user WHERE email = :email LIMIT 1")
     fun findUserByEmail(email: String): User?
+
+
+    @Insert
+    fun insertAll(users: List<User>)
+
 }
