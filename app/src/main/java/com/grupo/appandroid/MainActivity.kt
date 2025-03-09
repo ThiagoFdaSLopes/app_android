@@ -87,8 +87,8 @@ class MainActivity : ComponentActivity() {
                             name = name,
                             email = email,
                             phone = phone,
-                            password = "", // Not needed for display
-                            document = "", // Not needed for display
+                            password = "",
+                            document = "",
                             location = location,
                             skills = skills,
                             description = description,
@@ -102,7 +102,6 @@ class MainActivity : ComponentActivity() {
                             navController = navController
                         )
                     }
-                    // Fix candidate details route
                     composable(
                         route = "candidateDetail/{name}/{age}/{location}/{role}/{experience}",
                         arguments = listOf(

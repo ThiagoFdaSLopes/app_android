@@ -71,4 +71,8 @@ dependencies {
 
     // Dependencia LiveData
     implementation(libs.androidx.runtime.livedata)
+
+    // Retrofit e dependências relacionadas
+    implementation(libs.retrofit)
+    implementation(libs.gson)
 }
