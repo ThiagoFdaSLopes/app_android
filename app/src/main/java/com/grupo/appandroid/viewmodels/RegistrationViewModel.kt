@@ -10,6 +10,7 @@ import com.grupo.appandroid.model.User
 class RegistrationViewModel: ViewModel() {
 
     // Estados para os campos da entidade (úteis para uma UI com Compose)
+    val redirectRegister = mutableStateOf(false)
     val name = mutableStateOf("")
     var phone = mutableStateOf("")
     var email = mutableStateOf("")

@@ -39,6 +39,7 @@ import androidx.navigation.NavController
 import com.grupo.appandroid.R
 import com.grupo.appandroid.components.CustomTextArea
 import com.grupo.appandroid.components.CustomTextField
+import com.grupo.appandroid.components.MinimalDialog
 import com.grupo.appandroid.components.RegistrationTabRow
 import com.grupo.appandroid.components.TabItem
 import com.grupo.appandroid.database.repository.CompanyRepository
@@ -144,7 +145,7 @@ fun PeopleRegistrationForm(navController: NavController, viewModel: Registration
                 viewModel.description.value.isNotBlank() &&
                 (viewModel.password.value == viewModel.confirmPassword.value)
 
-        SignUpButton(registrationViewModel = viewModel, userRepository= userRepository, type = "user", companyRepository = companyRepository, isFormValid = isFormValid)
+        SignUpButton(registrationViewModel = viewModel, userRepository= userRepository, type = "user", companyRepository = companyRepository, isFormValid = isFormValid, navController = navController)
 
         SignInText(navController)
     }
@@ -180,14 +181,14 @@ fun CompanyRegistrationForm(navController: NavController, viewModel: Registratio
                 viewModel.description.value.isNotBlank() &&
                 (viewModel.password.value == viewModel.confirmPassword.value)
 
-        SignUpButton(registrationViewModel = viewModel, userRepository = userRepository, type = "company", companyRepository = companyRepository, isFormValid = isFormValid)
+        SignUpButton(registrationViewModel = viewModel, userRepository = userRepository, type = "company", companyRepository = companyRepository, isFormValid = isFormValid, navController = navController)
 
         SignInText(navController)
     }
 }
 
 @Composable
-fun SignUpButton(registrationViewModel: RegistrationViewModel, userRepository: UserRepository,companyRepository: CompanyRepository, type: String, isFormValid: Boolean) {
+fun SignUpButton(registrationViewModel: RegistrationViewModel, userRepository: UserRepository,companyRepository: CompanyRepository, type: String, isFormValid: Boolean, navController: NavController) {
     var user: User
     var company: Company
 
@@ -196,14 +197,25 @@ fun SignUpButton(registrationViewModel: RegistrationViewModel, userRepository: U
         if(type === "user") {
             user = registrationViewModel.createUser()
             userRepository.save(user)
+            registrationViewModel.redirectRegister.value = true
+            return
         }
 
         if(type === "company") {
             company = registrationViewModel.createCompany()
             companyRepository.save(company)
+            registrationViewModel.redirectRegister.value = true
+            return
         }
     }
-
+    MinimalDialog(
+        onDismissRequest = {},
+        onConfirmation = { registrationViewModel.redirectRegister.value = false
+            navController.navigate("login") },
+        dialogText = "Bem vindo, Registrado com Sucesso",
+        dialogTitle = "Registro",
+        textButton = "Entrar",
+        showDialog = registrationViewModel.redirectRegister.value)
     Button(
         onClick = { register() },
         modifier = Modifier
