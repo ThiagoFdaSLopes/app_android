@@ -112,17 +112,16 @@ class MainActivity : ComponentActivity() {
                             navArgument("experience") { type = NavType.StringType }
                         )
                     ) { backStackEntry ->
-                        val name = URLDecoder.decode( backStackEntry.arguments?.getString("name") ?: "")
+                        val name = URLDecoder.decode(backStackEntry.arguments?.getString("name") ?: "")
                         val age = URLDecoder.decode((backStackEntry.arguments?.getString("age")?.toIntOrNull() ?: 0).toString())
                         val location = URLDecoder.decode(backStackEntry.arguments?.getString("location") ?: "")
-                        val role =URLDecoder.decode(backStackEntry.arguments?.getString("role") ?: "")
+                        val role = URLDecoder.decode(backStackEntry.arguments?.getString("role") ?: "")
                         val experience = URLDecoder.decode(backStackEntry.arguments?.getString("experience") ?: "")
 
-                        // Create a User object with the required fields
                         val user = User(
-                            userCode = 0L, // Default value
+                            userCode = 0L,
                             name = name,
-                            email = "", // Not needed for display
+                            email = "",
                             phone = "",
                             password = "",
                             document = "",
@@ -141,20 +140,27 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     composable(
-                        "jobDetail/{title}/{company}/{location}/{modality}/{salary}"
+                        "jobDetail/{title}/{company}/{location}/{modality}/{description}",
+                        arguments = listOf(
+                            navArgument("title") { type = NavType.StringType },
+                            navArgument("company") { type = NavType.StringType },
+                            navArgument("location") { type = NavType.StringType },
+                            navArgument("modality") { type = NavType.StringType },
+                            navArgument("description") { type = NavType.StringType }
+                        )
                     ) { backStackEntry ->
                         val title = URLDecoder.decode(backStackEntry.arguments?.getString("title") ?: "", StandardCharsets.UTF_8.toString())
                         val company = URLDecoder.decode(backStackEntry.arguments?.getString("company") ?: "", StandardCharsets.UTF_8.toString())
                         val location = URLDecoder.decode(backStackEntry.arguments?.getString("location") ?: "", StandardCharsets.UTF_8.toString())
                         val modality = URLDecoder.decode(backStackEntry.arguments?.getString("modality") ?: "", StandardCharsets.UTF_8.toString())
-                        val salary = URLDecoder.decode(backStackEntry.arguments?.getString("salary") ?: "", StandardCharsets.UTF_8.toString())
+                        val description = URLDecoder.decode(backStackEntry.arguments?.getString("description") ?: "", StandardCharsets.UTF_8.toString())
 
                         JobDetailScreen(
                             title = title,
                             company = company,
                             location = location,
                             modality = modality,
-                            salary = salary,
+                            description = description,
                             navController = navController
                         )
                     }

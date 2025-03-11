@@ -75,4 +75,5 @@ dependencies {
     // Retrofit e dependências relacionadas
     implementation(libs.retrofit)
     implementation(libs.gson)
+    implementation(libs.converter.gson) // Adicione esta linha
 }
