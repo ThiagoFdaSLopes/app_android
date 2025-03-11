@@ -52,16 +52,21 @@ fun CandidatesScreen(
         }
     }
 
-    val filteredCompanies = remember(searchQuery, selectedLocation, selectedModality, allCompanies) {
-        allCompanies.filter { company ->
-            val description = company.description ?: ""
-            val matchesSearch = company.companyName.contains(searchQuery, ignoreCase = true) ||
-                    description.contains(searchQuery, ignoreCase = true)
-            val matchesLocation = selectedLocation.isEmpty() || company.location == selectedLocation
-            val matchesModality = selectedModality.isEmpty() || description.contains(selectedModality, ignoreCase = true)
-            matchesSearch && matchesLocation && matchesModality
+    val filteredCompanies =
+        remember(searchQuery, selectedLocation, selectedModality, allCompanies) {
+            allCompanies.filter { company ->
+                val description = company.description ?: ""
+                val matchesSearch = company.companyName.contains(searchQuery, ignoreCase = true) ||
+                        description.contains(searchQuery, ignoreCase = true)
+                val matchesLocation =
+                    selectedLocation.isEmpty() || company.location == selectedLocation
+                val matchesModality = selectedModality.isEmpty() || description.contains(
+                    selectedModality,
+                    ignoreCase = true
+                )
+                matchesSearch && matchesLocation && matchesModality
+            }
         }
-    }
 
     Box(
         modifier = modifier
@@ -116,12 +121,30 @@ fun CandidatesScreen(
                                 experienceTime = user.description ?: "Experiência não especificada",
                                 isCompanyLogin = isCompanyLogin,
                                 onClick = {
-                                    val encodedName = URLEncoder.encode(user.name, StandardCharsets.UTF_8.toString())
-                                    val encodedEmail = URLEncoder.encode(user.email, StandardCharsets.UTF_8.toString())
-                                    val encodedPhone = URLEncoder.encode(user.phone, StandardCharsets.UTF_8.toString())
-                                    val encodedLocation = URLEncoder.encode(user.location, StandardCharsets.UTF_8.toString())
-                                    val encodedSkills = URLEncoder.encode(user.skills, StandardCharsets.UTF_8.toString())
-                                    val encodedDescription = URLEncoder.encode(user.description ?: "", StandardCharsets.UTF_8.toString())
+                                    val encodedName = URLEncoder.encode(
+                                        user.name,
+                                        StandardCharsets.UTF_8.toString()
+                                    )
+                                    val encodedEmail = URLEncoder.encode(
+                                        user.email,
+                                        StandardCharsets.UTF_8.toString()
+                                    )
+                                    val encodedPhone = URLEncoder.encode(
+                                        user.phone,
+                                        StandardCharsets.UTF_8.toString()
+                                    )
+                                    val encodedLocation = URLEncoder.encode(
+                                        user.location,
+                                        StandardCharsets.UTF_8.toString()
+                                    )
+                                    val encodedSkills = URLEncoder.encode(
+                                        user.skills,
+                                        StandardCharsets.UTF_8.toString()
+                                    )
+                                    val encodedDescription = URLEncoder.encode(
+                                        user.description ?: "",
+                                        StandardCharsets.UTF_8.toString()
+                                    )
 
                                     navController.navigate(
                                         "userDetail/${user.userCode}/$encodedName/$encodedEmail/$encodedPhone/$encodedLocation/$encodedSkills/$encodedDescription"
@@ -143,11 +166,22 @@ fun CandidatesScreen(
                                 modality = modality,
                                 salary = salary,
                                 onClick = {
-                                    val encodedTitle = URLEncoder.encode(title, StandardCharsets.UTF_8.toString())
-                                    val encodedCompany = URLEncoder.encode(company.companyName, StandardCharsets.UTF_8.toString())
-                                    val encodedLocation = URLEncoder.encode(company.location, StandardCharsets.UTF_8.toString())
-                                    val encodedModality = URLEncoder.encode(modality, StandardCharsets.UTF_8.toString())
-                                    val encodedSalary = URLEncoder.encode(salary, StandardCharsets.UTF_8.toString())
+                                    val encodedTitle =
+                                        URLEncoder.encode(title, StandardCharsets.UTF_8.toString())
+                                    val encodedCompany = URLEncoder.encode(
+                                        company.companyName,
+                                        StandardCharsets.UTF_8.toString()
+                                    )
+                                    val encodedLocation = URLEncoder.encode(
+                                        company.location,
+                                        StandardCharsets.UTF_8.toString()
+                                    )
+                                    val encodedModality = URLEncoder.encode(
+                                        modality,
+                                        StandardCharsets.UTF_8.toString()
+                                    )
+                                    val encodedSalary =
+                                        URLEncoder.encode(salary, StandardCharsets.UTF_8.toString())
 
                                     navController.navigate(
                                         "jobDetail/$encodedTitle/$encodedCompany/$encodedLocation/$encodedModality/$encodedSalary"
@@ -159,7 +193,13 @@ fun CandidatesScreen(
                 }
             }
 
-            NavigationBar()
+            NavigationBar(
+                onSettingsClick = { navController.navigate("SettingsScreen") },
+                onPeopleClick = { navController.navigate("PeopleScreen") },
+                onBriefcaseClick = { navController.navigate("BriefcaseScreen") },
+                onBellClick = { navController.navigate("NotificationsScreen") },
+                onStarClick = { navController.navigate("FavoritesScreen") }
+            )
         }
     }
 }
