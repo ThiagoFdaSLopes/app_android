@@ -1,6 +1,7 @@
 package com.grupo.appandroid.componentes
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -15,7 +16,13 @@ import androidx.compose.ui.unit.dp
 import com.grupo.appandroid.R
 
 @Composable
-fun NavigationBar() {
+fun NavigationBar(
+    onSettingsClick: () -> Unit,
+    onPeopleClick: () -> Unit,
+    onBriefcaseClick: () -> Unit,
+    onBellClick: () -> Unit,
+    onStarClick: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -29,6 +36,7 @@ fun NavigationBar() {
             modifier = Modifier
                 .weight(1f)
                 .size(24.dp)
+                .clickable { onSettingsClick() }
         )
         Icon(
             painter = painterResource(id = R.drawable.people),
@@ -37,6 +45,7 @@ fun NavigationBar() {
             modifier = Modifier
                 .weight(1f)
                 .size(24.dp)
+                .clickable { onPeopleClick() }
         )
         Icon(
             painter = painterResource(id = R.drawable.briefcase),
@@ -45,6 +54,7 @@ fun NavigationBar() {
             modifier = Modifier
                 .weight(1f)
                 .size(52.dp)
+                .clickable { onBriefcaseClick() }
         )
         Icon(
             painter = painterResource(id = R.drawable.bell),
@@ -53,6 +63,7 @@ fun NavigationBar() {
             modifier = Modifier
                 .weight(1f)
                 .size(24.dp)
+                .clickable { onBellClick() }
         )
         Icon(
             painter = painterResource(id = R.drawable.star),
@@ -61,6 +72,7 @@ fun NavigationBar() {
             modifier = Modifier
                 .weight(1f)
                 .size(24.dp)
+                .clickable { onStarClick() }
         )
     }
 }
