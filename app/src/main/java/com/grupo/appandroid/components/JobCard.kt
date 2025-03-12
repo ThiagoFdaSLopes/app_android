@@ -35,6 +35,8 @@ import com.grupo.appandroid.R
 @Composable
 fun JobCard(
     job: Job,
+    isFavorite: Boolean,
+    onFavoriteClick: () -> Unit,
     onClick: () -> Unit
 ) {
     Card(
@@ -62,9 +64,18 @@ fun JobCard(
                     modifier = Modifier.weight(1f)
                 )
                 Icon(
-                    painter = painterResource(id = R.drawable.icon_heart),
-                    contentDescription = "Favorite",
-                    modifier = Modifier.size(24.dp)
+                    painter = painterResource(
+                        id = if (isFavorite) {
+                            R.drawable.heart_fill
+                        } else {
+                            R.drawable.icon_heart
+                        }
+                    ),
+                    contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clickable { onFavoriteClick() },
+                    tint = if (isFavorite) Color.Red else Color.Gray
                 )
             }
 

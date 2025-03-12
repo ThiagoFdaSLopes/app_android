@@ -25,21 +25,24 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.grupo.appandroid.componentes.NavigationBar
 import com.grupo.appandroid.components.CandidateCard
 import com.grupo.appandroid.components.JobCard
+import com.grupo.appandroid.components.LoadingIndicator
 import com.grupo.appandroid.components.TopHeader
 import com.grupo.appandroid.database.dao.AppDatabase
 import com.grupo.appandroid.model.BrazilianStates
 import com.grupo.appandroid.ui.theme.AmberPrimary
 import com.grupo.appandroid.ui.theme.DarkBackground
 import com.grupo.appandroid.viewmodels.CandidatesViewModel
+import com.grupo.appandroid.database.repository.UserRepository
+import kotlinx.coroutines.launch
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
-// Factory para criar a ViewModel
-import androidx.lifecycle.ViewModelProvider
+
 @Composable
 fun CandidatesScreen(
     navController: NavController,
@@ -48,11 +51,22 @@ fun CandidatesScreen(
     val context = LocalContext.current
     val prefs = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
     val isCompanyLogin = prefs.getString("loginType", null) == "company"
+    val userRepository = UserRepository(context)
+    val email = prefs.getString("loggedInEmail", null)
+    val user = userRepository.findUserByEmail(email = email!!)
+    val userCode = user?.userCode
     val database = AppDatabase.getDatabase(context)
+    val coroutineScope = rememberCoroutineScope()
 
     val viewModel: CandidatesViewModel = viewModel(
         factory = CandidatesViewModelFactory(database, isCompanyLogin)
     )
+
+    LaunchedEffect(Unit) {
+        if (userCode != null) {
+            viewModel.setUserCode(userCode.toString())
+        }
+    }
 
     val filteredUsers by remember(viewModel.searchQuery, viewModel.selectedLocation, viewModel.selectedArea, viewModel.users) {
         derivedStateOf {
@@ -145,6 +159,7 @@ fun CandidatesScreen(
                     ) {
                         if (isCompanyLogin) {
                             items(filteredUsers) { user ->
+                                val isFavorite = viewModel.favoriteCandidates.contains(user.userCode.toString())
                                 CandidateCard(
                                     name = user.name,
                                     age = estimateAge(user.academyLastYear),
@@ -152,6 +167,10 @@ fun CandidatesScreen(
                                     area = user.academyCourse ?: user.skills,
                                     experienceTime = user.description ?: "Não especificado",
                                     isCompanyLogin = true,
+                                    isFavorite = isFavorite,
+                                    onFavoriteClick = {
+                                        viewModel.toggleFavorite(user.userCode.toString())
+                                    },
                                     onClick = {
                                         navController.navigate("userDetail/${user.userCode}/${user.name}/${user.email}/${user.phone}/${user.location}/${user.skills}/${user.description}")
                                     }
@@ -159,8 +178,13 @@ fun CandidatesScreen(
                             }
                         } else {
                             items(filteredJobs) { job ->
+                                val isFavorite = viewModel.favorites.contains(job.id)
                                 JobCard(
                                     job = job,
+                                    isFavorite = isFavorite,
+                                    onFavoriteClick = {
+                                        viewModel.toggleFavorite(job.id)
+                                    },
                                     onClick = {
                                         val encodedTitle = URLEncoder.encode(job.title, StandardCharsets.UTF_8.toString())
                                         val encodedCompany = URLEncoder.encode(job.company.display_name, StandardCharsets.UTF_8.toString())
@@ -223,7 +247,6 @@ fun CandidatesScreen(
 }
 
 
-
 class CandidatesViewModelFactory(
     private val database: AppDatabase,
     private val isCompanyLogin: Boolean
@@ -237,39 +260,7 @@ class CandidatesViewModelFactory(
     }
 }
 
-// Mantenha LoadingIndicator e estimateAge como estavam
-@Composable
-private fun LoadingIndicator() {
-    val infiniteTransition = rememberInfiniteTransition(label = "loading")
-    val scale by infiniteTransition.animateFloat(
-        initialValue = 0.8f,
-        targetValue = 1.2f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(800),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "scale"
-    )
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        CircularProgressIndicator(
-            modifier = Modifier
-                .size(48.dp)
-                .scale(scale),
-            color = AmberPrimary,
-            strokeWidth = 4.dp
-        )
-        Text(
-            text = "Carregando vagas...",
-            color = Color.White,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium
-        )
-    }
-}
 
 fun estimateAge(academyLastYear: String?): Int {
     return academyLastYear?.toIntOrNull()?.let { lastYear ->

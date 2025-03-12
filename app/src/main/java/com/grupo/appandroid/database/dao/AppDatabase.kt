@@ -11,12 +11,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@Database(entities = [User::class, Company::class], version = 2, exportSchema = false)
+@Database(entities = [User::class, Company::class, Favorite::class, FavoriteCandidate::class], version = 4, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
-
 
     abstract fun userDao(): UserDAO
     abstract fun companyDao(): CompanyDAO
+    abstract fun favoriteDao(): FavoriteDao
+    abstract fun favoriteCandidateDao(): FavoriteCandidateDao
 
     companion object {
         @Volatile
@@ -36,7 +37,10 @@ abstract class AppDatabase : RoomDatabase() {
                             super.onCreate(db)
                             CoroutineScope(Dispatchers.IO).launch {
                                 INSTANCE?.let { database ->
-                                    database.userDao().insertAll(getSampleUsers())
+                                    val sampleUsers = getSampleUsers()
+                                    database.userDao().insertAll(sampleUsers)
+                                    // Optionally log or verify insertion
+                                    println("Inserted ${sampleUsers.size} sample users into the database")
                                 }
                             }
                         }
@@ -49,11 +53,11 @@ abstract class AppDatabase : RoomDatabase() {
 
         private fun getSampleUsers() = listOf(
             User(
-                userCode = 1L,
+                userCode = 1L, // Changed to String for consistency
                 name = "Carlos Eduardo",
                 phone = "11987654321",
                 email = "carlos@example.com",
-                password = "hashedPass123",
+                password = "hashedPass123", // Consider hashing in a real app
                 document = "123.456.789-00",
                 location = "São Paulo - SP",
                 skills = "Desenvolvedor FullStack",
@@ -124,6 +128,5 @@ abstract class AppDatabase : RoomDatabase() {
                 academyLastYear = "2017"
             )
         )
-
     }
 }

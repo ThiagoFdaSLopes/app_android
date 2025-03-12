@@ -7,10 +7,13 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.grupo.appandroid.database.dao.AppDatabase
+import com.grupo.appandroid.database.dao.Favorite
+import com.grupo.appandroid.database.dao.FavoriteCandidate
 import com.grupo.appandroid.model.Category
 import com.grupo.appandroid.model.User
 import com.grupo.appandroid.service.RetrofitClient
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -41,9 +44,19 @@ class CandidatesViewModel(
     var resultsPerPage by mutableStateOf(20)
 
     private val userDao = database.userDao()
+    private val favoriteDao = database.favoriteDao()
+    private val favoriteCandidateDao = database.favoriteCandidateDao() // Added
+    private var userCode = "" // Represents companyCode when isCompanyLogin is true
+
+    private var _favorites by mutableStateOf<Set<String>>(emptySet()) // For jobs
+    var favorites: Set<String> by mutableStateOf(emptySet()) // For jobs
+        private set
+
+    private var _favoriteCandidates by mutableStateOf<Set<String>>(emptySet()) // For candidates
+    var favoriteCandidates: Set<String> by mutableStateOf(emptySet()) // For candidates
+        private set
 
     init {
-        // Carregamento inicial
         if (isCompanyLogin) {
             fetchUsers(1)
         } else {
@@ -52,7 +65,86 @@ class CandidatesViewModel(
         }
     }
 
-    // Funções de atualização de filtros
+    fun setUserCode(code: String) {
+        userCode = code
+        if (isCompanyLogin) {
+            loadFavoriteCandidates()
+        } else {
+            loadFavorites()
+        }
+    }
+
+    private fun loadFavorites() { // For jobs (non-company login)
+        viewModelScope.launch {
+            try {
+                favoriteDao.getFavoritesByUser(userCode).collectLatest { favorites ->
+                    _favorites = favorites.map { it.jobId }.toSet()
+                    this@CandidatesViewModel.favorites = _favorites
+                }
+            } catch (e: Exception) {
+                error = "Error loading favorites: ${e.message}"
+            }
+        }
+    }
+
+    private fun loadFavoriteCandidates() { // For candidates (company login)
+        viewModelScope.launch {
+            try {
+                favoriteCandidateDao.getFavoritesByCompany(userCode).collectLatest { favoriteCandidates ->
+                    _favoriteCandidates = favoriteCandidates.map { it.userCode }.toSet()
+                    this@CandidatesViewModel.favoriteCandidates = _favoriteCandidates
+                }
+            } catch (e: Exception) {
+                error = "Error loading favorite candidates: ${e.message}"
+            }
+        }
+    }
+
+    fun toggleFavorite(id: String) { // For jobs or candidates based on login type
+        if (isCompanyLogin) {
+            toggleFavoriteCandidate(id)
+        } else {
+            toggleFavoriteJob(id)
+        }
+    }
+
+    private fun toggleFavoriteJob(jobId: String) { // For jobs (non-company login)
+        viewModelScope.launch {
+            try {
+                val isFavorite = favoriteDao.isFavorite(userCode, jobId)
+                if (isFavorite) {
+                    favoriteDao.delete(Favorite(userCode, jobId))
+                    _favorites = _favorites - jobId
+                } else {
+                    favoriteDao.insert(Favorite(userCode, jobId))
+                    _favorites = _favorites + jobId
+                }
+                favorites = _favorites
+            } catch (e: Exception) {
+                error = "Error toggling favorite job: ${e.message}"
+            }
+        }
+    }
+
+    private fun toggleFavoriteCandidate(userCode: String) { // For candidates (company login)
+        viewModelScope.launch {
+            try {
+                val isFavorite = favoriteCandidateDao.isFavorite(this@CandidatesViewModel.userCode, userCode)
+                if (isFavorite) {
+                    favoriteCandidateDao.delete(FavoriteCandidate(this@CandidatesViewModel.userCode, userCode))
+                    _favoriteCandidates = _favoriteCandidates - userCode
+                } else {
+                    favoriteCandidateDao.insert(FavoriteCandidate(this@CandidatesViewModel.userCode, userCode))
+                    _favoriteCandidates = _favoriteCandidates + userCode
+                }
+                favoriteCandidates = _favoriteCandidates
+            } catch (e: Exception) {
+                error = "Error toggling favorite candidate: ${e.message}"
+            }
+        }
+    }
+
+    // Filter update functions (unchanged)
     fun updateSearchQuery(query: String) {
         searchQuery = query
     }
@@ -94,7 +186,6 @@ class CandidatesViewModel(
         }
     }
 
-    // Funções de busca
     private fun fetchUsers(page: Int) {
         viewModelScope.launch {
             isLoading = true

@@ -64,6 +64,8 @@ dependencies {
     // Implementação banco de dados
     // Dependência principal do Room
     implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx) // Added for Flow support
+    implementation(libs.kotlinx.coroutines.core) // Added for full coroutine support
     // Dependência para gerar código (processamento de anotações)
     //noinspection KaptUsageInsteadOfKsp
     kapt(libs.androidx.room.compiler)
