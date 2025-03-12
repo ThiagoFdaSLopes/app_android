@@ -16,6 +16,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.grupo.appandroid.ui.theme.AmberPrimary
 import com.grupo.appandroid.ui.theme.TextWhite
 
 // Função auxiliar para criar cada ícone e texto

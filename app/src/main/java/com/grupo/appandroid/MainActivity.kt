@@ -18,6 +18,7 @@ import com.grupo.appandroid.model.User
 import com.grupo.appandroid.ui.theme.RegistrationAppTheme
 import com.grupo.appandroid.viewmodels.LoginViewModel
 import com.grupo.appandroid.viewmodels.RegistrationViewModel
+import com.grupo.appandroid.views.FavoritesScreen
 import com.grupo.appandroid.views.HomeScreen
 import com.grupo.appandroid.views.JobDetailScreen
 import com.grupo.appandroid.views.LoginScreen
@@ -67,6 +68,13 @@ class MainActivity : ComponentActivity() {
                             navController = navController,
                             viewModel = RegistrationViewModel()
                         )
+                    }
+                    composable(
+                        route = "FavoritesScreen",
+                        enterTransition = { fadeIn(animationSpec = tween(500)) },
+                        exitTransition = { fadeOut(animationSpec = tween(500)) }
+                    ){
+                        FavoritesScreen(navController)
                     }
                     composable(
                         route = "home",
