@@ -7,8 +7,8 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.grupo.appandroid.database.dao.AppDatabase
-import com.grupo.appandroid.database.dao.Favorite
 import com.grupo.appandroid.database.dao.FavoriteCandidate
+import com.grupo.appandroid.database.dao.FavoriteJob
 import com.grupo.appandroid.model.Category
 import com.grupo.appandroid.model.User
 import com.grupo.appandroid.service.RetrofitClient
@@ -22,7 +22,6 @@ class CandidatesViewModel(
     private val isCompanyLogin: Boolean
 ) : ViewModel() {
 
-    // Estados
     var users by mutableStateOf<List<User>>(emptyList())
         private set
     var jobs by mutableStateOf<List<Job>>(emptyList())
@@ -45,15 +44,12 @@ class CandidatesViewModel(
 
     private val userDao = database.userDao()
     private val favoriteDao = database.favoriteDao()
-    private val favoriteCandidateDao = database.favoriteCandidateDao() // Added
-    private var userCode = "" // Represents companyCode when isCompanyLogin is true
+    private val favoriteCandidateDao = database.favoriteCandidateDao()
+    private var userCode = ""
 
-    private var _favorites by mutableStateOf<Set<String>>(emptySet()) // For jobs
-    var favorites: Set<String> by mutableStateOf(emptySet()) // For jobs
+    var favorites by mutableStateOf<Set<String>>(emptySet())
         private set
-
-    private var _favoriteCandidates by mutableStateOf<Set<String>>(emptySet()) // For candidates
-    var favoriteCandidates: Set<String> by mutableStateOf(emptySet()) // For candidates
+    var favoriteCandidates by mutableStateOf<Set<String>>(emptySet()) 
         private set
 
     init {
@@ -74,33 +70,25 @@ class CandidatesViewModel(
         }
     }
 
-    private fun loadFavorites() { // For jobs (non-company login)
+    private fun loadFavorites() {
         viewModelScope.launch {
-            try {
-                favoriteDao.getFavoritesByUser(userCode).collectLatest { favorites ->
-                    _favorites = favorites.map { it.jobId }.toSet()
-                    this@CandidatesViewModel.favorites = _favorites
-                }
-            } catch (e: Exception) {
-                error = "Error loading favorites: ${e.message}"
+            favoriteDao.getFavoritesByUser(userCode).collectLatest { favoritesList ->
+                favorites = favoritesList.map { it.jobId }.toSet()
+                println("Favorites loaded: $favorites")
             }
         }
     }
 
-    private fun loadFavoriteCandidates() { // For candidates (company login)
+    private fun loadFavoriteCandidates() {
         viewModelScope.launch {
-            try {
-                favoriteCandidateDao.getFavoritesByCompany(userCode).collectLatest { favoriteCandidates ->
-                    _favoriteCandidates = favoriteCandidates.map { it.userCode }.toSet()
-                    this@CandidatesViewModel.favoriteCandidates = _favoriteCandidates
-                }
-            } catch (e: Exception) {
-                error = "Error loading favorite candidates: ${e.message}"
+            favoriteCandidateDao.getFavoritesByCompany(userCode).collectLatest { favoriteCandidates ->
+                this@CandidatesViewModel.favoriteCandidates = favoriteCandidates.map { it.userCode }.toSet()
+                println("Favorite candidates loaded: $favoriteCandidates")
             }
         }
     }
 
-    fun toggleFavorite(id: String) { // For jobs or candidates based on login type
+    fun toggleFavorite(id: String) {
         if (isCompanyLogin) {
             toggleFavoriteCandidate(id)
         } else {
@@ -108,43 +96,42 @@ class CandidatesViewModel(
         }
     }
 
-    private fun toggleFavoriteJob(jobId: String) { // For jobs (non-company login)
+    private fun toggleFavoriteJob(jobId: String) {
         viewModelScope.launch {
             try {
-                val isFavorite = favoriteDao.isFavorite(userCode, jobId)
-                if (isFavorite) {
-                    favoriteDao.delete(Favorite(userCode, jobId))
-                    _favorites = _favorites - jobId
+                val isCurrentlyFavorite = favorites.contains(jobId)
+                if (isCurrentlyFavorite) {
+                    favoriteDao.delete(FavoriteJob(userCode, jobId))
+                    favorites = favorites - jobId
                 } else {
-                    favoriteDao.insert(Favorite(userCode, jobId))
-                    _favorites = _favorites + jobId
+                    favoriteDao.insert(FavoriteJob(userCode, jobId))
+                    favorites = favorites + jobId
                 }
-                favorites = _favorites
+                println("Toggled favorite job: $jobId, new favorites: $favorites")
             } catch (e: Exception) {
                 error = "Error toggling favorite job: ${e.message}"
             }
         }
     }
 
-    private fun toggleFavoriteCandidate(userCode: String) { // For candidates (company login)
+    private fun toggleFavoriteCandidate(userCode: String) {
         viewModelScope.launch {
             try {
                 val isFavorite = favoriteCandidateDao.isFavorite(this@CandidatesViewModel.userCode, userCode)
                 if (isFavorite) {
                     favoriteCandidateDao.delete(FavoriteCandidate(this@CandidatesViewModel.userCode, userCode))
-                    _favoriteCandidates = _favoriteCandidates - userCode
+                    favoriteCandidates = favoriteCandidates - userCode
                 } else {
                     favoriteCandidateDao.insert(FavoriteCandidate(this@CandidatesViewModel.userCode, userCode))
-                    _favoriteCandidates = _favoriteCandidates + userCode
+                    favoriteCandidates = favoriteCandidates + userCode
                 }
-                favoriteCandidates = _favoriteCandidates
+                println("Toggled favorite candidate: $userCode, new favorites: $favoriteCandidates")
             } catch (e: Exception) {
                 error = "Error toggling favorite candidate: ${e.message}"
             }
         }
     }
 
-    // Filter update functions (unchanged)
     fun updateSearchQuery(query: String) {
         searchQuery = query
     }

@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.runtime.LaunchedEffect
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavType
@@ -14,13 +15,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.grupo.appandroid.database.dao.AppDatabase
 import com.grupo.appandroid.model.Company
 import com.grupo.appandroid.model.User
 import com.grupo.appandroid.ui.theme.RegistrationAppTheme
+import com.grupo.appandroid.viewmodels.CandidatesViewModel
 import com.grupo.appandroid.views.CandidatesScreen
 import com.grupo.appandroid.viewmodels.LoginViewModel
 import com.grupo.appandroid.viewmodels.RegistrationViewModel
-import com.grupo.appandroid.views.CompanyDetailScreen
 import com.grupo.appandroid.views.LoginScreen
 import com.grupo.appandroid.views.RegistrationScreen
 import com.grupo.appandroid.views.UserDetailScreen
@@ -29,6 +31,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.grupo.appandroid.database.repository.UserRepository
+import com.grupo.appandroid.views.CandidatesViewModelFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,6 +51,19 @@ class MainActivity : ComponentActivity() {
         setContent {
             RegistrationAppTheme {
                 val navController = rememberNavController()
+                val database = AppDatabase.getDatabase(this)
+                val prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
+                val isCompanyLogin = prefs.getString("loginType", null) == "company"
+
+                val candidatesViewModel: CandidatesViewModel = viewModel(
+                    factory = CandidatesViewModelFactory(database, isCompanyLogin)
+                )
+                LaunchedEffect (Unit) {
+                    val email = prefs.getString("loggedInEmail", null)
+                    val userRepository = UserRepository(this@MainActivity)
+                    val user = userRepository.findUserByEmail(email ?: "")
+                    user?.userCode?.let { candidatesViewModel.setUserCode(it.toString()) }
+                }
                 NavHost(
                     navController = navController,
                     startDestination = "login"
@@ -99,7 +117,8 @@ class MainActivity : ComponentActivity() {
                         )
                         UserDetailScreen(
                             user = user,
-                            navController = navController
+                            navController = navController,
+                            viewModel = candidatesViewModel
                         )
                     }
                     composable(
@@ -136,12 +155,14 @@ class MainActivity : ComponentActivity() {
 
                         UserDetailScreen(
                             user = user,
-                            navController = navController
+                            navController = navController,
+                            viewModel = candidatesViewModel
                         )
                     }
                     composable(
-                        "jobDetail/{title}/{company}/{location}/{modality}/{description}",
+                        "jobDetail/{jobId}/{title}/{company}/{location}/{modality}/{description}",
                         arguments = listOf(
+                            navArgument("jobId") { type = NavType.StringType },
                             navArgument("title") { type = NavType.StringType },
                             navArgument("company") { type = NavType.StringType },
                             navArgument("location") { type = NavType.StringType },
@@ -149,6 +170,7 @@ class MainActivity : ComponentActivity() {
                             navArgument("description") { type = NavType.StringType }
                         )
                     ) { backStackEntry ->
+                        val jobId = URLDecoder.decode(backStackEntry.arguments?.getString("jobId") ?: "", StandardCharsets.UTF_8.toString())
                         val title = URLDecoder.decode(backStackEntry.arguments?.getString("title") ?: "", StandardCharsets.UTF_8.toString())
                         val company = URLDecoder.decode(backStackEntry.arguments?.getString("company") ?: "", StandardCharsets.UTF_8.toString())
                         val location = URLDecoder.decode(backStackEntry.arguments?.getString("location") ?: "", StandardCharsets.UTF_8.toString())
@@ -156,12 +178,14 @@ class MainActivity : ComponentActivity() {
                         val description = URLDecoder.decode(backStackEntry.arguments?.getString("description") ?: "", StandardCharsets.UTF_8.toString())
 
                         JobDetailScreen(
+                            jobId = jobId,
                             title = title,
                             company = company,
                             location = location,
                             modality = modality,
                             description = description,
-                            navController = navController
+                            navController = navController,
+                            viewModel = candidatesViewModel
                         )
                     }
                 }

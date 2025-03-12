@@ -9,8 +9,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Icon
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -22,12 +24,13 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.grupo.appandroid.componentes.NavigationBar
 import com.grupo.appandroid.model.User
-import com.grupo.appandroid.model.Company
+import com.grupo.appandroid.viewmodels.CandidatesViewModel
 
 @Composable
 fun UserDetailScreen(
     user: User,
-    navController: NavController
+    navController: NavController,
+    viewModel: CandidatesViewModel
 ) {
     Column(
         modifier = Modifier
@@ -36,16 +39,36 @@ fun UserDetailScreen(
             .systemBarsPadding()
             .padding(top = 22.dp)
     ) {
-        // Back Button
-        IconButton(
-            onClick = { navController.popBackStack() },
-            modifier = Modifier.padding(start = 8.dp)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
-                contentDescription = "Voltar",
-                tint = Color.White
-            )
+            IconButton(onClick = { navController.popBackStack() }) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Voltar",
+                    tint = Color.White
+                )
+            }
+
+            IconButton(onClick = {
+                viewModel.toggleFavorite(user.userCode.toString())
+            }) {
+                Icon(
+                    imageVector = if (viewModel.favoriteCandidates.contains(user.userCode.toString()))
+                        Icons.Default.Favorite
+                    else
+                        Icons.Default.FavoriteBorder,
+                    contentDescription = "Favoritar",
+                    tint = if (viewModel.favoriteCandidates.contains(user.userCode.toString()))
+                        Color.Red
+                    else
+                        Color.White
+                )
+            }
         }
 
         Column(
@@ -53,12 +76,10 @@ fun UserDetailScreen(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            // Profile Header
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // Profile Image
                 Box(
                     modifier = Modifier
                         .size(100.dp)
@@ -68,7 +89,6 @@ fun UserDetailScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Name and Academic Info
                 Text(
                     text = user.name,
                     color = Color.White,
@@ -86,7 +106,6 @@ fun UserDetailScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Info Items
             InfoItem(icon = "📱", label = "Telefone:", value = user.phone)
             InfoItem(icon = "📍", label = "Localização:", value = user.location)
             InfoItem(icon = "🎓", label = "Formação:", value = "${user.academyLevel ?: "Não informado"}")
@@ -99,7 +118,6 @@ fun UserDetailScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Skills Section
             Text(
                 text = "Habilidades:",
                 color = Color.White,
@@ -113,7 +131,6 @@ fun UserDetailScreen(
                 fontSize = 14.sp
             )
 
-            // Description Section
             user.description?.let { description ->
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
@@ -132,151 +149,41 @@ fun UserDetailScreen(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Action Buttons
             Button(
-                onClick = { /* TODO */ },
+                onClick = { viewModel.toggleFavorite(user.userCode.toString()) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.White)
+                    .padding(top = 16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.White,
+                    contentColor = Color.Black
+                )
             ) {
-                Text("FAVORITAR CANDIDATO", color = Color.Black)
-            }
-
-            Button(
-                onClick = { /* TODO */ },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
-            ) {
-                Text("CONTATO")
+                Text(
+                    text = if (viewModel.favoriteCandidates.contains(user.userCode.toString()))
+                        "Remover dos Favoritos"
+                    else
+                        "Favoritar Candidato",
+                    fontSize = 16.sp
+                )
             }
 
             NavigationBar()
         }
     }
 }
-
-@Composable
-fun CompanyDetailScreen(
-    company: Company,
-    navController: NavController
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF1C1E21))
-            .systemBarsPadding()
-            .padding(top = 22.dp)
-    ) {
-        // Back Button
-        IconButton(
-            onClick = { navController.popBackStack() },
-            modifier = Modifier.padding(start = 8.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
-                contentDescription = "Voltar",
-                tint = Color.White
-            )
-        }
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            // Company Header
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // Company Logo
-                Box(
-                    modifier = Modifier
-                        .size(100.dp)
-                        .clip(CircleShape)
-                        .background(Color.White)
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = company.companyName,
-                    color = Color.White,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = company.industry,
-                    color = Color.White,
-                    fontSize = 18.sp
-                )
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Company Details
-            InfoItem(icon = "📱", label = "Telefone:", value = company.phone)
-            InfoItem(icon = "📍", label = "Localização:", value = company.location)
-            InfoItem(icon = "🏢", label = "Setor:", value = company.industry)
-            InfoItem(icon = "📄", label = "CNPJ:", value = company.document)
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Description Section
-            company.description?.let { description ->
-                Text(
-                    text = "Sobre a empresa:",
-                    color = Color.White,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-                Text(
-                    text = description,
-                    color = Color.White.copy(alpha = 0.8f),
-                    fontSize = 14.sp
-                )
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            Button(
-                onClick = { /* TODO */ },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.White)
-            ) {
-                Text("SEGUIR EMPRESA", color = Color.Black)
-            }
-
-            Button(
-                onClick = { /* TODO */ },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.White)
-            ) {
-                Text("VER VAGAS")
-            }
-
-            NavigationBar()
-        }
-    }
-}
-
 @Composable
 fun JobDetailScreen(
+    jobId: String,
     title: String,
     company: String,
     location: String,
     modality: String,
     description: String,
-    navController: NavController
+    navController: NavController,
+    viewModel: CandidatesViewModel
 ) {
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -284,16 +191,20 @@ fun JobDetailScreen(
             .systemBarsPadding()
             .padding(top = 22.dp)
     ) {
-        // Back Button
-        IconButton(
-            onClick = { navController.popBackStack() },
-            modifier = Modifier.padding(start = 8.dp)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
-                contentDescription = "Voltar",
-                tint = Color.White
-            )
+            IconButton(onClick = { navController.popBackStack() }) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Voltar",
+                    tint = Color.White
+                )
+            }
         }
 
         Column(
@@ -301,7 +212,6 @@ fun JobDetailScreen(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            // Job Header
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -322,13 +232,11 @@ fun JobDetailScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Job Details
             InfoItem(icon = "📍", label = "Localização:", value = location)
             InfoItem(icon = "💼", label = "Modalidade:", value = modality)
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Description Section
             Text(
                 text = "Descrição da vaga:",
                 color = Color.White,
@@ -344,19 +252,8 @@ fun JobDetailScreen(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Action Buttons
             Button(
-                onClick = { /* TODO */ },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.White)
-            ) {
-                Text("SALVAR VAGA", color = Color.Black)
-            }
-
-            Button(
-                onClick = { /* TODO */ },
+                onClick = { /* TODO: Implement apply functionality */ },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),

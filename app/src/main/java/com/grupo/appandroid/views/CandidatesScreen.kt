@@ -68,7 +68,13 @@ fun CandidatesScreen(
         }
     }
 
-    val filteredUsers by remember(viewModel.searchQuery, viewModel.selectedLocation, viewModel.selectedArea, viewModel.users) {
+    val filteredUsers by remember(
+        viewModel.searchQuery,
+        viewModel.selectedLocation,
+        viewModel.selectedArea,
+        viewModel.users,
+        viewModel.favoriteCandidates
+    ) {
         derivedStateOf {
             viewModel.users.filter { user ->
                 val matchesSearch = user.name.contains(viewModel.searchQuery, ignoreCase = true)
@@ -184,14 +190,16 @@ fun CandidatesScreen(
                                     isFavorite = isFavorite,
                                     onFavoriteClick = {
                                         viewModel.toggleFavorite(job.id)
+                                        println("Favorite clicked in CandidatesScreen for jobId: ${job.id}, isFavorite: $isFavorite")
                                     },
                                     onClick = {
+                                        val encodedJobId = URLEncoder.encode(job.id, StandardCharsets.UTF_8.toString())
                                         val encodedTitle = URLEncoder.encode(job.title, StandardCharsets.UTF_8.toString())
                                         val encodedCompany = URLEncoder.encode(job.company.display_name, StandardCharsets.UTF_8.toString())
                                         val encodedLocation = URLEncoder.encode(job.location.display_name, StandardCharsets.UTF_8.toString())
                                         val encodedModality = URLEncoder.encode(job.contract_time ?: "Não especificado", StandardCharsets.UTF_8.toString())
                                         val encodedDescription = URLEncoder.encode(job.description, StandardCharsets.UTF_8.toString())
-                                        navController.navigate("jobDetail/$encodedTitle/$encodedCompany/$encodedLocation/$encodedModality/$encodedDescription")
+                                        navController.navigate("jobDetail/$encodedJobId/$encodedTitle/$encodedCompany/$encodedLocation/$encodedModality/$encodedDescription")
                                     }
                                 )
                             }
