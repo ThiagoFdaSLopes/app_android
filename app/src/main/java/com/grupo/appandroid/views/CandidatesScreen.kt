@@ -1,11 +1,6 @@
 package com.grupo.appandroid.views
 
 import android.content.Context
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,10 +12,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -35,18 +28,16 @@ import com.grupo.appandroid.components.LoadingIndicator
 import com.grupo.appandroid.components.TopHeader
 import com.grupo.appandroid.database.dao.AppDatabase
 import com.grupo.appandroid.model.BrazilianStates
-import com.grupo.appandroid.ui.theme.AmberPrimary
 import com.grupo.appandroid.ui.theme.DarkBackground
 import com.grupo.appandroid.viewmodels.CandidatesViewModel
 import com.grupo.appandroid.database.repository.UserRepository
-import kotlinx.coroutines.launch
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
 @Composable
 fun CandidatesScreen(
     navController: NavController,
-    viewModel: CandidatesViewModel, // Usaremos apenas este viewModel
+    viewModel: CandidatesViewModel,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -58,7 +49,6 @@ fun CandidatesScreen(
     val userCode = user?.userCode
     val database = AppDatabase.getDatabase(context)
 
-    // Aqui você cria uma nova instância do viewModel, ignorando o parâmetro
     val viewModel: CandidatesViewModel = viewModel(
         viewModelStoreOwner = navController.getViewModelStoreOwner(navController.graph.id),
         factory = CandidatesViewModelFactory(database, isCompanyLogin)
@@ -71,7 +61,6 @@ fun CandidatesScreen(
         }
     }
 
-    // Restante do código permanece igual...
     val filteredUsers by remember(
         viewModel.searchQuery,
         viewModel.selectedLocation,
@@ -190,7 +179,9 @@ fun CandidatesScreen(
                             }
                         } else {
                             items(filteredJobs) { job ->
-                                val isFavorite = viewModel.favoriteCandidates.contains(user?.userCode.toString())
+                                val isFavorite by remember(viewModel.favorites) {
+                                    derivedStateOf { viewModel.favorites.contains(job.id) }
+                                }
                                 JobCard(
                                     job = job,
                                     isFavorite = isFavorite,
