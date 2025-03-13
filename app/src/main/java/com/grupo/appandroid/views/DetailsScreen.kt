@@ -1,5 +1,6 @@
 package com.grupo.appandroid.views
 
+import JobApplicationModal
 import android.content.Context
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
@@ -38,7 +39,7 @@ import com.grupo.appandroid.viewmodels.CandidatesViewModel
 @Composable
 fun UserDetailScreen(
     user: User,
-    viewModel: CandidatesViewModel, // Usaremos apenas este viewModel
+    viewModel: CandidatesViewModel,
     navController: NavController
 ) {
     val context = LocalContext.current
@@ -217,6 +218,7 @@ fun JobDetailScreen(
     navController: NavController,
     viewModel: CandidatesViewModel
 ) {
+    var showApplicationModal by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -287,7 +289,7 @@ fun JobDetailScreen(
             Spacer(modifier = Modifier.weight(1f))
 
             Button(
-                onClick = { /* TODO: Implement apply functionality */ },
+                onClick = { showApplicationModal = true },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
@@ -299,6 +301,11 @@ fun JobDetailScreen(
             NavigationBar()
         }
     }
+
+    JobApplicationModal(
+        isVisible = showApplicationModal,
+        onDismiss = { showApplicationModal = false }
+    )
 }
 
 @Composable
