@@ -16,7 +16,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.grupo.appandroid.database.dao.AppDatabase
-import com.grupo.appandroid.model.Company
 import com.grupo.appandroid.model.User
 import com.grupo.appandroid.ui.theme.RegistrationAppTheme
 import com.grupo.appandroid.viewmodels.CandidatesViewModel
@@ -58,12 +57,14 @@ class MainActivity : ComponentActivity() {
                 val candidatesViewModel: CandidatesViewModel = viewModel(
                     factory = CandidatesViewModelFactory(database, isCompanyLogin)
                 )
-                LaunchedEffect (Unit) {
+
+                LaunchedEffect(Unit) {
                     val email = prefs.getString("loggedInEmail", null)
                     val userRepository = UserRepository(this@MainActivity)
                     val user = userRepository.findUserByEmail(email ?: "")
                     user?.userCode?.let { candidatesViewModel.setUserCode(it.toString()) }
                 }
+
                 NavHost(
                     navController = navController,
                     startDestination = "login"
@@ -87,7 +88,10 @@ class MainActivity : ComponentActivity() {
                         enterTransition = { fadeIn(animationSpec = tween(500)) },
                         exitTransition = { fadeOut(animationSpec = tween(500)) }
                     ) {
-                        CandidatesScreen(navController = navController)
+                        CandidatesScreen(
+                            navController = navController,
+                            viewModel = candidatesViewModel // Passe o viewModel como parâmetro
+                        )
                     }
                     composable(
                         "userDetail/{userCode}/{name}/{email}/{phone}/{location}/{skills}/{description}"
@@ -118,45 +122,7 @@ class MainActivity : ComponentActivity() {
                         UserDetailScreen(
                             user = user,
                             navController = navController,
-                            viewModel = candidatesViewModel
-                        )
-                    }
-                    composable(
-                        route = "candidateDetail/{name}/{age}/{location}/{role}/{experience}",
-                        arguments = listOf(
-                            navArgument("name") { type = NavType.StringType },
-                            navArgument("age") { type = NavType.StringType },
-                            navArgument("location") { type = NavType.StringType },
-                            navArgument("role") { type = NavType.StringType },
-                            navArgument("experience") { type = NavType.StringType }
-                        )
-                    ) { backStackEntry ->
-                        val name = URLDecoder.decode(backStackEntry.arguments?.getString("name") ?: "")
-                        val age = URLDecoder.decode((backStackEntry.arguments?.getString("age")?.toIntOrNull() ?: 0).toString())
-                        val location = URLDecoder.decode(backStackEntry.arguments?.getString("location") ?: "")
-                        val role = URLDecoder.decode(backStackEntry.arguments?.getString("role") ?: "")
-                        val experience = URLDecoder.decode(backStackEntry.arguments?.getString("experience") ?: "")
-
-                        val user = User(
-                            userCode = 0L,
-                            name = name,
-                            email = "",
-                            phone = "",
-                            password = "",
-                            document = "",
-                            location = location,
-                            skills = role,
-                            description = "Experience: $experience",
-                            academyLevel = null,
-                            academyCourse = null,
-                            academyInstitution = null,
-                            academyLastYear = null
-                        )
-
-                        UserDetailScreen(
-                            user = user,
-                            navController = navController,
-                            viewModel = candidatesViewModel
+                            viewModel = candidatesViewModel // Passe o viewModel
                         )
                     }
                     composable(
@@ -193,3 +159,4 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+

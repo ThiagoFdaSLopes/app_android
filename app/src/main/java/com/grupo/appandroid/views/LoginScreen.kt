@@ -33,21 +33,21 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
     val companyRepository = CompanyRepository(context)
     val prefs = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
 
-    // Observe states
     val email = loginViewModel.email.observeAsState("")
     val password = loginViewModel.password.observeAsState("")
     val isLoading = loginViewModel.isLoading.observeAsState(initial = false)
     val errorMessage = loginViewModel.errorMessage.observeAsState("")
     val loginSuccess = loginViewModel.loginSuccess.observeAsState()
 
-    // Handle login success
     loginSuccess.value?.let { result ->
-        LaunchedEffect (result) {
+        LaunchedEffect(result) {
             prefs.edit()
                 .putString("loggedInEmail", result.email)
                 .putString("loginType", result.type)
                 .apply()
-            navController.navigate("home")
+            navController.navigate("home") {
+                popUpTo("login") { inclusive = true }
+            }
         }
     }
 

@@ -46,6 +46,7 @@ import java.nio.charset.StandardCharsets
 @Composable
 fun CandidatesScreen(
     navController: NavController,
+    viewModel: CandidatesViewModel, // Usaremos apenas este viewModel
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -56,18 +57,21 @@ fun CandidatesScreen(
     val user = userRepository.findUserByEmail(email = email!!)
     val userCode = user?.userCode
     val database = AppDatabase.getDatabase(context)
-    val coroutineScope = rememberCoroutineScope()
 
+    // Aqui você cria uma nova instância do viewModel, ignorando o parâmetro
     val viewModel: CandidatesViewModel = viewModel(
+        viewModelStoreOwner = navController.getViewModelStoreOwner(navController.graph.id),
         factory = CandidatesViewModelFactory(database, isCompanyLogin)
     )
 
     LaunchedEffect(Unit) {
         if (userCode != null) {
             viewModel.setUserCode(userCode.toString())
+            println("CandidatesScreen - Initial favoriteCandidates: ${viewModel.favoriteCandidates}")
         }
     }
 
+    // Restante do código permanece igual...
     val filteredUsers by remember(
         viewModel.searchQuery,
         viewModel.selectedLocation,
@@ -165,7 +169,9 @@ fun CandidatesScreen(
                     ) {
                         if (isCompanyLogin) {
                             items(filteredUsers) { user ->
-                                val isFavorite = viewModel.favoriteCandidates.contains(user.userCode.toString())
+                                val isFavorite by remember(viewModel.favoriteCandidates) {
+                                    derivedStateOf { viewModel.favoriteCandidates.contains(user.userCode.toString()) }
+                                }
                                 CandidateCard(
                                     name = user.name,
                                     age = estimateAge(user.academyLastYear),
@@ -184,7 +190,7 @@ fun CandidatesScreen(
                             }
                         } else {
                             items(filteredJobs) { job ->
-                                val isFavorite = viewModel.favorites.contains(job.id)
+                                val isFavorite = viewModel.favoriteCandidates.contains(user?.userCode.toString())
                                 JobCard(
                                     job = job,
                                     isFavorite = isFavorite,
@@ -267,8 +273,6 @@ class CandidatesViewModelFactory(
         throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
-
-
 
 fun estimateAge(academyLastYear: String?): Int {
     return academyLastYear?.toIntOrNull()?.let { lastYear ->

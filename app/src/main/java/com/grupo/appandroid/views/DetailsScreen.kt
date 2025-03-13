@@ -1,5 +1,8 @@
 package com.grupo.appandroid.views
 
+import android.content.Context
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -17,21 +20,51 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.grupo.appandroid.R
 import com.grupo.appandroid.componentes.NavigationBar
+import com.grupo.appandroid.database.dao.AppDatabase
+import com.grupo.appandroid.database.repository.UserRepository
 import com.grupo.appandroid.model.User
 import com.grupo.appandroid.viewmodels.CandidatesViewModel
 
 @Composable
 fun UserDetailScreen(
     user: User,
-    navController: NavController,
-    viewModel: CandidatesViewModel
+    viewModel: CandidatesViewModel, // Usaremos apenas este viewModel
+    navController: NavController
 ) {
+    val context = LocalContext.current
+    val prefs = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
+    val isCompanyLogin = prefs.getString("loginType", null) == "company"
+    val database = AppDatabase.getDatabase(context)
+
+    val viewModel: CandidatesViewModel = viewModel(
+        viewModelStoreOwner = navController.getViewModelStoreOwner(navController.graph.id),
+        factory = CandidatesViewModelFactory(database, isCompanyLogin)
+    )
+
+    val isFavorite by remember(viewModel.favoriteCandidates) {
+        derivedStateOf { viewModel.favoriteCandidates.contains(user.userCode.toString()) }
+    }
+
+    LaunchedEffect(Unit) {
+        val userCode = prefs.getString("loggedInEmail", null)?.let { email ->
+            UserRepository(context).findUserByEmail(email)?.userCode
+        }
+        if (userCode != null) {
+            viewModel.setUserCode(userCode.toString())
+            println("UserDetailScreen - Initial favoriteCandidates: ${viewModel.favoriteCandidates}")
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -54,19 +87,23 @@ fun UserDetailScreen(
                 )
             }
 
-            IconButton(onClick = {
-                viewModel.toggleFavorite(user.userCode.toString())
-            }) {
+            IconButton(
+                onClick = { viewModel.toggleFavorite(user.userCode.toString()) },
+                modifier = Modifier.size(48.dp)
+            ) {
+                val animatedSize by animateDpAsState(
+                    targetValue = if (isFavorite) 32.dp else 24.dp,
+                    animationSpec = tween(durationMillis = 200)
+                )
                 Icon(
-                    imageVector = if (viewModel.favoriteCandidates.contains(user.userCode.toString()))
-                        Icons.Default.Favorite
-                    else
-                        Icons.Default.FavoriteBorder,
+                    painter = painterResource(
+                        id = if (isFavorite) R.drawable.heart_fill else R.drawable.icon_heart
+                    ),
                     contentDescription = "Favoritar",
-                    tint = if (viewModel.favoriteCandidates.contains(user.userCode.toString()))
-                        Color.Red
-                    else
-                        Color.White
+                    tint = if (isFavorite) Color.Red else Color.White,
+                    modifier = Modifier
+                        .size(animatedSize)
+                        .padding(4.dp)
                 )
             }
         }
@@ -160,10 +197,7 @@ fun UserDetailScreen(
                 )
             ) {
                 Text(
-                    text = if (viewModel.favoriteCandidates.contains(user.userCode.toString()))
-                        "Remover dos Favoritos"
-                    else
-                        "Favoritar Candidato",
+                    text = if (isFavorite) "Remover dos Favoritos" else "Favoritar Candidato",
                     fontSize = 16.sp
                 )
             }

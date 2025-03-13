@@ -49,9 +49,8 @@ class CandidatesViewModel(
 
     var favorites by mutableStateOf<Set<String>>(emptySet())
         private set
-    var favoriteCandidates by mutableStateOf<Set<String>>(emptySet()) 
+    var favoriteCandidates by mutableStateOf<Set<String>>(emptySet())
         private set
-
     init {
         if (isCompanyLogin) {
             fetchUsers(1)
@@ -81,9 +80,9 @@ class CandidatesViewModel(
 
     private fun loadFavoriteCandidates() {
         viewModelScope.launch {
-            favoriteCandidateDao.getFavoritesByCompany(userCode).collectLatest { favoriteCandidates ->
-                this@CandidatesViewModel.favoriteCandidates = favoriteCandidates.map { it.userCode }.toSet()
-                println("Favorite candidates loaded: $favoriteCandidates")
+            favoriteCandidateDao.getFavoritesByCompany(userCode).collect { favoriteCandidatesList ->
+                favoriteCandidates = favoriteCandidatesList.map { it.userCode }.toSet()
+                println("Favorite candidates updated: $favoriteCandidates")
             }
         }
     }
@@ -114,6 +113,8 @@ class CandidatesViewModel(
         }
     }
 
+
+
     private fun toggleFavoriteCandidate(userCode: String) {
         viewModelScope.launch {
             try {
@@ -125,13 +126,12 @@ class CandidatesViewModel(
                     favoriteCandidateDao.insert(FavoriteCandidate(this@CandidatesViewModel.userCode, userCode))
                     favoriteCandidates = favoriteCandidates + userCode
                 }
-                println("Toggled favorite candidate: $userCode, new favorites: $favoriteCandidates")
+                println("toggleFavoriteCandidate - Toggled $userCode, new favorites: $favoriteCandidates")
             } catch (e: Exception) {
                 error = "Error toggling favorite candidate: ${e.message}"
             }
         }
     }
-
     fun updateSearchQuery(query: String) {
         searchQuery = query
     }
