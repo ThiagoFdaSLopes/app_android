@@ -45,11 +45,11 @@ class RegistrationViewModel: ViewModel() {
             document = document.value,
             location = location.value,
             skills = skills.value,
-            description = if (description.value.isBlank()) null else description.value,
-            academyLevel = if (academyLevel.value.isBlank()) null else academyLevel.value,
-            academyCourse = if (academyCourse.value.isBlank()) null else academyCourse.value,
-            academyInstitution = if (academyInstitution.value.isBlank()) null else academyInstitution.value,
-            academyLastYear = if (academyLastYear.value.isBlank()) null else academyLastYear.value,
+            description = if (description.value.isBlank()) "" else description.value,
+            academyLevel = if (academyLevel.value.isBlank()) "" else academyLevel.value,
+            academyCourse = if (academyCourse.value.isBlank()) "" else academyCourse.value,
+            academyInstitution = if (academyInstitution.value.isBlank()) "" else academyInstitution.value,
+            academyLastYear = if (academyLastYear.value.isBlank()) "" else academyLastYear.value,
         )
 
         _user.value = newUser
