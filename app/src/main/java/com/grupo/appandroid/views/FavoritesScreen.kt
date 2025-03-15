@@ -1,9 +1,13 @@
-import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -11,6 +15,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -19,12 +24,17 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.grupo.appandroid.componentes.NavigationBar
+import com.grupo.appandroid.components.CandidateCard
+import com.grupo.appandroid.components.JobCard
+import com.grupo.appandroid.components.LoadingIndicator
 import com.grupo.appandroid.database.dao.AppDatabase
 import com.grupo.appandroid.database.repository.CompanyRepository
 import com.grupo.appandroid.database.repository.UserRepository
-import com.grupo.appandroid.model.FavoriteItem
+import com.grupo.appandroid.model.User
 import com.grupo.appandroid.ui.theme.DarkBackground
 import com.grupo.appandroid.ui.theme.TextWhite
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 @Composable
 fun FavoritesScreen(
@@ -32,25 +42,18 @@ fun FavoritesScreen(
     isCompany: Boolean
 ) {
     val context = LocalContext.current
-
-    // Obtendo as SharedPreferences
     val prefs = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
     val email = prefs.getString("loggedInEmail", null)
 
-    // Se o email for nulo, trate o caso (redirecione para login ou exiba mensagem)
     if (email.isNullOrEmpty()) {
-        // Exemplo: Tela de erro ou redirecionamento
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(text = "Email não encontrado. Faça login.", color = TextWhite)
         }
         return
     }
 
-    // Crie as instâncias dos repositórios para obter os códigos
     val userRepository = UserRepository(context)
     val companyRepository = CompanyRepository(context)
-
-    // Define se o login é de usuário (quando não for login de empresa)
     val isUser = !isCompany
     val code = if (isUser) {
         userRepository.findUserByEmail(email)?.userCode ?: 1
@@ -58,17 +61,13 @@ fun FavoritesScreen(
         companyRepository.findByEmail(email)?.companyCode ?: 1
     }
 
-    // Obtenha as instâncias dos DAOs a partir do banco de dados
-    // Exemplo: MyDatabase é sua classe de banco de dados singleton
     val database = AppDatabase.getDatabase(context)
     val favoriteCandidateDao = database.favoriteCandidateDao()
     val favoriteJobDao = database.favoriteDao()
 
-    // Crie o Factory e obtenha a ViewModel
-    val factory = FavoritesScreenViewModelFactory(favoriteCandidateDao, favoriteJobDao)
+    val factory = FavoritesScreenViewModelFactory(favoriteCandidateDao, favoriteJobDao, database)
     val viewModel: FavoritesScreenViewModel = viewModel(factory = factory)
 
-    // Carrega os favoritos conforme o tipo de usuário
     LaunchedEffect(key1 = code, key2 = isCompany) {
         viewModel.loadFavorites(
             userType = if (isCompany) UserType.COMPANY else UserType.USER,
@@ -76,9 +75,10 @@ fun FavoritesScreen(
         )
     }
 
-    // Observe os fluxos da ViewModel
-    val favoriteCandidates by viewModel.favoriteCandidates.collectAsState()
-    val favoriteJobs by viewModel.favoriteJobs.collectAsState()
+    val favoriteJobsDetails by viewModel.favoriteJobDetails.collectAsState()
+    val favoriteCandidatesDetails by viewModel.favoriteCandidateDetails.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val error by viewModel.error.collectAsState()
 
     Box(
         modifier = Modifier
@@ -93,70 +93,145 @@ fun FavoritesScreen(
             horizontalAlignment = Alignment.Start
         ) {
             val titleText = if (isCompany) "Candidatos Favoritados" else "Vagas Favoritadas"
-            println("TITULO ABAIXO")
-            println(titleText)
-            println("IS COMPANY? ABAIXO")
-            println(isCompany)
-            Text(
-                text = titleText,
-                color = TextWhite,
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Start,
-                modifier = Modifier.padding(top = 16.dp, start = 16.dp)
-            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = titleText,
+                    color = TextWhite,
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Start
+                )
+                IconButton(
+                    onClick = { navController.navigate("home") },
+                    modifier = Modifier.background(Color.Black.copy(alpha = 0.6f), CircleShape)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Voltar",
+                        tint = Color.White
+                    )
+                }
+            }
+
             Spacer(modifier = Modifier.height(40.dp))
-            FavoritesList(
-                isCompany = isCompany,
-                viewModel = viewModel,
-                onCardClick = { navController.navigate("DetailsScreen") },
-                onHeartClick = { /* Lógica para atualizar ou desfavoritar */ }
-            )
-        }
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 16.dp)
-        ) {
-            NavigationBar(
-                onSettingsClick = { navController.navigate("SettingsScreen") },
-                onPeopleClick = { navController.navigate("PeopleScreen") },
-                onBriefcaseClick = { navController.navigate("BriefcaseScreen") },
-                onBellClick = { navController.navigate("NotificationsScreen") },
-                onStarClick = { navController.navigate("FavoritesScreen") }
-            )
+
+            when {
+                isLoading -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        LoadingIndicator()
+                    }
+                }
+                error != null -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = error ?: "Erro desconhecido",
+                            color = TextWhite,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+                favoriteJobsDetails.isEmpty() && !isCompany -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "Nenhuma vaga favoritada",
+                            color = TextWhite,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+                favoriteCandidatesDetails.isEmpty() && isCompany -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "Nenhum candidato favoritado",
+                            color = TextWhite,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+                else -> {
+                    FavoritesList(
+                        isCompany = isCompany,
+                        viewModel = viewModel,
+                        favoriteJobsDetails = favoriteJobsDetails,
+                        favoriteCandidatesDetails = favoriteCandidatesDetails,
+                        navController = navController
+                    )
+                }
+            }
         }
     }
 }
 
-
-@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun FavoritesList(
     isCompany: Boolean,
     viewModel: FavoritesScreenViewModel,
-    onCardClick: () -> Unit,
-    onHeartClick: () -> Unit
+    favoriteJobsDetails: List<Job>,
+    favoriteCandidatesDetails: List<User>,
+    navController: NavController
 ) {
-    // Mapeia os dados para FavoriteItem conforme o tipo do usuário
-    val favoriteItems: List<FavoriteItem> = if (isCompany) {
-        viewModel.favoriteCandidates.value.map { candidate ->
-            FavoriteItem.CandidateFavorite(candidate)
-        }
-    } else {
-        viewModel.favoriteJobs.value.map { job ->
-            FavoriteItem.JobFavorite(job)
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp)
+    ) {
+        if (!isCompany) {
+            items(favoriteJobsDetails) { job ->
+                val isFavorite = true
+                JobCard(
+                    job = job,
+                    isFavorite = isFavorite,
+                    onFavoriteClick = {
+                        viewModel.toggleFavorite(job.id)
+                        println("Favorite clicked in FavoritesScreen for jobId: ${job.id}")
+                    },
+                    onClick = {
+                        val encodedJobId = URLEncoder.encode(job.id, StandardCharsets.UTF_8.toString())
+                        val encodedTitle = URLEncoder.encode(job.title, StandardCharsets.UTF_8.toString())
+                        val encodedCompany = URLEncoder.encode(job.company.display_name, StandardCharsets.UTF_8.toString())
+                        val encodedLocation = URLEncoder.encode(job.location.display_name, StandardCharsets.UTF_8.toString())
+                        val encodedModality = URLEncoder.encode(job.contract_time ?: "Não especificado", StandardCharsets.UTF_8.toString())
+                        val encodedDescription = URLEncoder.encode(job.description, StandardCharsets.UTF_8.toString())
+                        navController.navigate("jobDetail/$encodedJobId/$encodedTitle/$encodedCompany/$encodedLocation/$encodedModality/$encodedDescription")
+                    }
+                )
+            }
+        } else {
+            items(favoriteCandidatesDetails) { user ->
+                val isFavorite = true
+                CandidateCard(
+                    name = user.name,
+                    age = estimateAge(user.academyLastYear),
+                    location = user.location,
+                    area = user.academyCourse ?: user.skills,
+                    experienceTime = user.description ?: "Não especificado",
+                    isCompanyLogin = true,
+                    isFavorite = isFavorite,
+                    onFavoriteClick = {
+                        viewModel.toggleFavoriteCandidate(user.userCode.toString())
+                        println("Favorite clicked in FavoritesScreen for userCode: ${user.userCode}")
+                    },
+                    onClick = {
+                        navController.navigate("userDetail/${user.userCode}/${user.name}/${user.email}/${user.phone}/${user.location}/${user.skills}/${user.description}")
+                    }
+                )
+            }
         }
     }
+}
 
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
-        items(favoriteItems) { favoriteItem ->
-            FavoriteCard(
-                favoriteItem = favoriteItem,
-                onCardClick = onCardClick,
-                onHeartClick = onHeartClick
-            )
-        }
-    }
+// Função auxiliar já existente no seu código
+fun estimateAge(academyLastYear: String?): Int {
+    return academyLastYear?.toIntOrNull()?.let { lastYear ->
+        val currentYear = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)
+        val yearsSinceGraduation = currentYear - lastYear
+        22 + yearsSinceGraduation
+    } ?: 30
 }
