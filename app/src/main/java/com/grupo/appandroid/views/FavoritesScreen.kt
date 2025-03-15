@@ -26,9 +26,15 @@ import androidx.navigation.NavController
 import com.grupo.appandroid.componentes.NavigationBar
 import com.grupo.appandroid.ui.theme.DarkBackground
 import com.grupo.appandroid.ui.theme.TextWhite
+import com.grupo.appandroid.viewmodels.LoginViewModel
 
 @Composable
 fun FavoritesScreen(navController: NavController) {
+    val context = LocalContext.current
+    val loginViewModel = LoginViewModel()
+
+
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -61,12 +67,8 @@ fun FavoritesScreen(navController: NavController) {
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 16.dp) // Ajuste adicional para evitar colisões com a barra
         ) {
-            NavigationBar(
-                onSettingsClick = { navController.navigate("SettingsScreen") },
-                onPeopleClick = { navController.navigate("PeopleScreen") },
-                onBriefcaseClick = { navController.navigate("BriefcaseScreen") },
-                onBellClick = { navController.navigate("NotificationsScreen") },
-                onStarClick = { navController.navigate("FavoritesScreen") })
+            NavigationBar(navController = navController)
+
         }
     }
 }

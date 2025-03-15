@@ -28,6 +28,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -120,20 +121,8 @@ fun HomeScreen(navController: NavController, loginViewModel: LoginViewModel) {
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 16.dp) // Ajuste adicional para evitar colisões com a barra
         ) {
-            NavigationBar(
-                onSettingsClick = { navController.navigate("SettingsScreen") },
-                onPeopleClick = { navController.navigate("PeopleScreen") },
-                onBriefcaseClick = { navController.navigate("BriefcaseScreen") },
-                onBellClick = { navController.navigate("NotificationsScreen") },
-                onStarClick = { navController.navigate("FavoritesScreen") })
+            NavigationBar(navController = navController)
+}
         }
-    }
 }
 
-
-//@Preview(showSystemUi = true)
-//@Composable
-//fun HomeScreenPreview() {
-//    HomeScreen()
-//
-//}

@@ -11,18 +11,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.grupo.appandroid.R
+import com.grupo.appandroid.viewmodels.LoginViewModel
 
 @Composable
 fun NavigationBar(
-    onSettingsClick: () -> Unit,
-    onPeopleClick: () -> Unit,
-    onBriefcaseClick: () -> Unit,
-    onBellClick: () -> Unit,
-    onStarClick: () -> Unit
+    navController: NavController,
 ) {
+    val context = LocalContext.current
+    val loginViewModel = LoginViewModel()
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -36,34 +37,25 @@ fun NavigationBar(
             modifier = Modifier
                 .weight(1f)
                 .size(24.dp)
-                .clickable { onSettingsClick() }
+                .clickable {  navController.navigate("PersonalProfileScreen")  }
         )
         Icon(
-            painter = painterResource(id = R.drawable.people),
+            painter = painterResource(id = R.drawable.briefcase),
             contentDescription = "People",
             tint = Color.White,
             modifier = Modifier
                 .weight(1f)
                 .size(24.dp)
-                .clickable { onPeopleClick() }
+                .clickable {  navController.navigate("VagasScreen")}
         )
         Icon(
-            painter = painterResource(id = R.drawable.briefcase),
+            painter = painterResource(id = R.drawable.home),
             contentDescription = "Briefcase",
             tint = Color.White,
             modifier = Modifier
                 .weight(1f)
                 .size(52.dp)
-                .clickable { onBriefcaseClick() }
-        )
-        Icon(
-            painter = painterResource(id = R.drawable.bell),
-            contentDescription = "Bell",
-            tint = Color.White,
-            modifier = Modifier
-                .weight(1f)
-                .size(24.dp)
-                .clickable { onBellClick() }
+                .clickable {  navController.navigate("home") }
         )
         Icon(
             painter = painterResource(id = R.drawable.star),
@@ -72,7 +64,20 @@ fun NavigationBar(
             modifier = Modifier
                 .weight(1f)
                 .size(24.dp)
-                .clickable { onStarClick() }
+                .clickable {  navController.navigate("FavoritesScreen")}
         )
+        Icon(
+            painter = painterResource(id = R.drawable.logout),
+            contentDescription = "Loggout",
+            tint = Color.White,
+            modifier = Modifier
+                .weight(1f)
+                .size(24.dp)
+                .clickable {  loginViewModel.logout(context)
+                    navController.navigate("login") {
+                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                    } }
+        )
+
     }
 }
