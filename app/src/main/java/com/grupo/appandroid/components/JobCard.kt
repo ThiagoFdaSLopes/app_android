@@ -1,15 +1,20 @@
 package com.grupo.appandroid.components
 
+import Job
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,103 +31,80 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.grupo.appandroid.R
 
+// JobCard.kt
 @Composable
 fun JobCard(
-    title: String,
-    company: String,
-    location: String,
-    modality: String,
-    salary: String,
+    job: Job,
+    isFavorite: Boolean,
+    onFavoriteClick: () -> Unit,
     onClick: () -> Unit
 ) {
-    Box(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White, shape = RoundedCornerShape(8.dp))
-            .clickable { onClick() }
-            .padding(16.dp)
+            .clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        )
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth()
         ) {
-            Column(
-                modifier = Modifier
-                    .padding(end = 16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "",
+                    text = job.title,
+                    color = Color.Black,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f)
+                )
+                Icon(
+                    painter = painterResource(
+                        id = if (isFavorite) {
+                            R.drawable.heart_fill
+                        } else {
+                            R.drawable.icon_heart
+                        }
+                    ),
+                    contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
                     modifier = Modifier
-                        .size(60.dp)
-                        .background(Color.DarkGray, shape = RoundedCornerShape(8.dp))
-                        .padding(16.dp),
-                    color = Color.White,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
+                        .size(24.dp)
+                        .clickable { onFavoriteClick() },
+                    tint = if (isFavorite) Color.Red else Color.Gray
                 )
             }
 
-            Column(
-                modifier = Modifier
-                    .weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = job.company.display_name,
+                color = Color.Black.copy(alpha = 0.8f),
+                fontSize = 16.sp
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = buildAnnotatedString {
-                        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("Título: ")
-                        }
-                        append(title)
-                    },
-                    fontSize = 16.sp
-                )
-                Text(
-                    text = buildAnnotatedString {
-                        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("Empresa: ")
-                        }
-                        append(company)
-                    },
+                    text = job.location.display_name,
+                    color = Color.Black.copy(alpha = 0.7f),
                     fontSize = 14.sp
                 )
+
                 Text(
-                    text = buildAnnotatedString {
-                        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("${stringResource(id = R.string.location)}: ")
-                        }
-                        append(location)
-                    },
-                    fontSize = 14.sp
-                )
-                Text(
-                    text = buildAnnotatedString {
-                        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("Modalidade: ")
-                        }
-                        append(modality)
-                    },
-                    fontSize = 14.sp
-                )
-                Text(
-                    text = buildAnnotatedString {
-                        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("Salário: ")
-                        }
-                        append(salary)
-                    },
+                    text = job.contract_time ?: "Not specified",
+                    color = Color.Black.copy(alpha = 0.7f),
                     fontSize = 14.sp
                 )
             }
         }
-
-        Icon(
-            painter = painterResource(id = R.drawable.icon_heart),
-            contentDescription = "Favorite",
-            modifier = Modifier
-                .size(24.dp)
-                .align(Alignment.TopEnd)
-                .clickable { /* Ação ao clicar */ }
-        )
     }
 }

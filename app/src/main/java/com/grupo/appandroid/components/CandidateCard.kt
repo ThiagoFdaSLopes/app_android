@@ -36,6 +36,8 @@ fun CandidateCard(
     area: String,
     experienceTime: String,
     isCompanyLogin: Boolean,
+    isFavorite: Boolean = false,
+    onFavoriteClick: () -> Unit = {},
     onClick: () -> Unit
 ) {
     Box(
@@ -110,17 +112,15 @@ fun CandidateCard(
                     fontSize = 14.sp
                 )
 
-                // Ícones adicionais apenas para login de empresa
                 if (isCompanyLogin) {
                     Row(
                         modifier = Modifier
                             .padding(top = 8.dp),
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        // Ícone e texto para Location
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
-                                painter = painterResource(id = R.drawable.pin), // Substitua pelo seu ícone
+                                painter = painterResource(id = R.drawable.pin),
                                 contentDescription = "Modalidade",
                                 modifier = Modifier.size(20.dp),
                                 tint = Color.Gray
@@ -133,10 +133,9 @@ fun CandidateCard(
                             )
                         }
 
-                        // Ícone e texto para Experiência
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
-                                painter = painterResource(id = R.drawable.briefcase), // Substitua pelo seu ícone
+                                painter = painterResource(id = R.drawable.briefcase),
                                 contentDescription = "Tempo",
                                 modifier = Modifier.size(20.dp),
                                 tint = Color.Gray
@@ -154,12 +153,15 @@ fun CandidateCard(
         }
 
         Icon(
-            painter = painterResource(id = R.drawable.icon_heart),
-            contentDescription = "Favorite",
+            painter = painterResource(
+                id = if (isFavorite) R.drawable.heart_fill else R.drawable.icon_heart
+            ),
+            contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
             modifier = Modifier
                 .size(24.dp)
                 .align(Alignment.TopEnd)
-                .clickable { /* Ação ao clicar */ }
+                .clickable { onFavoriteClick() },
+            tint = if (isFavorite) Color.Red else Color.Gray
         )
     }
 }

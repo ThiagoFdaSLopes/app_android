@@ -1,4 +1,3 @@
-// CandidatesScreen.kt
 package com.grupo.appandroid.views
 
 import android.content.Context
@@ -6,68 +5,92 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.grupo.appandroid.componentes.NavigationBar
 import com.grupo.appandroid.components.CandidateCard
 import com.grupo.appandroid.components.JobCard
-import com.grupo.appandroid.componentes.NavigationBar
+import com.grupo.appandroid.components.LoadingIndicator
 import com.grupo.appandroid.components.TopHeader
 import com.grupo.appandroid.database.dao.AppDatabase
+import com.grupo.appandroid.model.BrazilianStates
 import com.grupo.appandroid.ui.theme.DarkBackground
+import com.grupo.appandroid.viewmodels.CandidatesViewModel
+import com.grupo.appandroid.database.repository.UserRepository
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
 @Composable
 fun CandidatesScreen(
     navController: NavController,
+    viewModel: CandidatesViewModel,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val prefs = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
     val isCompanyLogin = prefs.getString("loginType", null) == "company"
+    val userRepository = UserRepository(context)
+    val email = prefs.getString("loggedInEmail", null)
+    val user = userRepository.findUserByEmail(email = email!!)
+    val userCode = user?.userCode
+    val database = AppDatabase.getDatabase(context)
 
-    val database = remember { AppDatabase.getDatabase(context) }
-    val allUsers = remember { database.userDao().findAllUsers() }
-    val allCompanies = remember { database.companyDao().findAllCompany() }
+    val viewModel: CandidatesViewModel = viewModel(
+        viewModelStoreOwner = navController.getViewModelStoreOwner(navController.graph.id),
+        factory = CandidatesViewModelFactory(database, isCompanyLogin)
+    )
 
-    var searchQuery by remember { mutableStateOf("") }
-    var selectedLocation by remember { mutableStateOf("") }
-    var selectedModality by remember { mutableStateOf("") }
-
-    val filteredUsers = remember(searchQuery, selectedLocation, allUsers) {
-        allUsers.filter { user ->
-            val matchesSearch = user.name.contains(searchQuery, ignoreCase = true) ||
-                    user.skills.contains(searchQuery, ignoreCase = true)
-            val matchesLocation = selectedLocation.isEmpty() || user.location == selectedLocation
-            matchesSearch && matchesLocation
+    LaunchedEffect(Unit) {
+        if (userCode != null) {
+            viewModel.setUserCode(userCode.toString())
+            println("CandidatesScreen - Initial favoriteCandidates: ${viewModel.favoriteCandidates}")
         }
     }
 
-    val filteredCompanies =
-        remember(searchQuery, selectedLocation, selectedModality, allCompanies) {
-            allCompanies.filter { company ->
-                val description = company.description ?: ""
-                val matchesSearch = company.companyName.contains(searchQuery, ignoreCase = true) ||
-                        description.contains(searchQuery, ignoreCase = true)
-                val matchesLocation =
-                    selectedLocation.isEmpty() || company.location == selectedLocation
-                val matchesModality = selectedModality.isEmpty() || description.contains(
-                    selectedModality,
-                    ignoreCase = true
-                )
-                matchesSearch && matchesLocation && matchesModality
+    val filteredUsers by remember(
+        viewModel.searchQuery,
+        viewModel.selectedLocation,
+        viewModel.selectedArea,
+        viewModel.users,
+        viewModel.favoriteCandidates
+    ) {
+        derivedStateOf {
+            viewModel.users.filter { user ->
+                val matchesSearch = user.name.contains(viewModel.searchQuery, ignoreCase = true)
+                val matchesLocation = viewModel.selectedLocation.isEmpty() || user.location.contains(viewModel.selectedLocation, ignoreCase = true)
+                val matchesArea = viewModel.selectedArea.isEmpty() ||
+                        (user.academyCourse?.contains(viewModel.selectedArea, ignoreCase = true) == true) ||
+                        (user.skills.contains(viewModel.selectedArea, ignoreCase = true))
+                matchesSearch && matchesLocation && matchesArea
             }
         }
+    }
+
+    val filteredJobs by remember(viewModel.searchQuery, viewModel.selectedLocation, viewModel.jobs) {
+        derivedStateOf {
+            viewModel.jobs.filter { job ->
+                val matchesSearch = job.title.contains(viewModel.searchQuery, ignoreCase = true) ||
+                        job.description.contains(viewModel.searchQuery, ignoreCase = true)
+                val matchesLocation = viewModel.selectedLocation.isEmpty() ||
+                        job.location.display_name.contains(viewModel.selectedLocation, ignoreCase = true)
+                matchesSearch && matchesLocation
+            }
+        }
+    }
 
     Box(
         modifier = modifier
@@ -79,116 +102,145 @@ fun CandidatesScreen(
             modifier = Modifier.fillMaxSize()
         ) {
             TopHeader(
-                onSearchChange = { searchQuery = it },
-                onLocationChange = { selectedLocation = it },
-                onModalityChange = { selectedModality = it },
-                selectedLocation = selectedLocation,
-                selectedModality = selectedModality
+                onSearchChange = viewModel::updateSearchQuery,
+                onCategoryChange = viewModel::updateCategory,
+                onLocationChange = viewModel::updateLocation,
+                onResultsPerPageChange = viewModel::updateResultsPerPage,
+                onAreaChange = viewModel::updateArea,
+                selectedCategory = viewModel.selectedCategory,
+                selectedLocation = viewModel.selectedLocation,
+                selectedResultsPerPage = viewModel.resultsPerPage,
+                selectedArea = viewModel.selectedArea,
+                categories = viewModel.categories,
+                locations = BrazilianStates.states,
+                isCompanyLogin = isCompanyLogin,
+                areas = listOf("TI", "Engenharia", "Saúde", "Marketing")
             )
 
-            if ((isCompanyLogin && filteredUsers.isEmpty()) || (!isCompanyLogin && filteredCompanies.isEmpty())) {
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = if (isCompanyLogin)
-                            "Nenhum candidato encontrado com os filtros selecionados"
-                        else
-                            "Nenhuma vaga encontrada com os filtros selecionados",
-                        color = Color.White,
-                        fontSize = 16.sp,
-                        textAlign = TextAlign.Center
-                    )
+            when {
+                viewModel.isLoading -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        LoadingIndicator()
+                    }
                 }
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    if (isCompanyLogin) {
-                        items(filteredUsers) { user ->
-                            CandidateCard(
-                                name = user.name,
-                                age = 0,
-                                location = user.location,
-                                area = user.skills,
-                                experienceTime = user.description ?: "Experiência não especificada",
-                                isCompanyLogin = isCompanyLogin,
-                                onClick = {
-                                    val encodedName = URLEncoder.encode(
-                                        user.name,
-                                        StandardCharsets.UTF_8.toString()
-                                    )
-                                    val encodedEmail = URLEncoder.encode(
-                                        user.email,
-                                        StandardCharsets.UTF_8.toString()
-                                    )
-                                    val encodedPhone = URLEncoder.encode(
-                                        user.phone,
-                                        StandardCharsets.UTF_8.toString()
-                                    )
-                                    val encodedLocation = URLEncoder.encode(
-                                        user.location,
-                                        StandardCharsets.UTF_8.toString()
-                                    )
-                                    val encodedSkills = URLEncoder.encode(
-                                        user.skills,
-                                        StandardCharsets.UTF_8.toString()
-                                    )
-                                    val encodedDescription = URLEncoder.encode(
-                                        user.description ?: "",
-                                        StandardCharsets.UTF_8.toString()
-                                    )
-
-                                    navController.navigate(
-                                        "userDetail/${user.userCode}/$encodedName/$encodedEmail/$encodedPhone/$encodedLocation/$encodedSkills/$encodedDescription"
-                                    )
+                viewModel.error != null -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = viewModel.error ?: "Unknown error",
+                            color = Color.Red,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+                (isCompanyLogin && filteredUsers.isEmpty()) || (!isCompanyLogin && filteredJobs.isEmpty()) -> {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = if (isCompanyLogin) "Nenhum usuário encontrado" else "Nenhuma vaga encontrada",
+                            color = Color.White,
+                            fontSize = 16.sp,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        if (isCompanyLogin) {
+                            items(filteredUsers) { user ->
+                                val isFavorite by remember(viewModel.favoriteCandidates) {
+                                    derivedStateOf { viewModel.favoriteCandidates.contains(user.userCode.toString()) }
                                 }
-                            )
+                                CandidateCard(
+                                    name = user.name,
+                                    age = estimateAge(user.academyLastYear),
+                                    location = user.location,
+                                    area = user.academyCourse ?: user.skills,
+                                    experienceTime = user.description ?: "Não especificado",
+                                    isCompanyLogin = true,
+                                    isFavorite = isFavorite,
+                                    onFavoriteClick = {
+                                        viewModel.toggleFavorite(user.userCode.toString())
+                                    },
+                                    onClick = {
+                                        navController.navigate("userDetail/${user.userCode}/${user.name}/${user.email}/${user.phone}/${user.location}/${user.skills}/${user.description}")
+                                    }
+                                )
+                            }
+                        } else {
+                            items(filteredJobs) { job ->
+                                val isFavorite by remember(viewModel.favorites) {
+                                    derivedStateOf { viewModel.favorites.contains(job.id) }
+                                }
+                                JobCard(
+                                    job = job,
+                                    isFavorite = isFavorite,
+                                    onFavoriteClick = {
+                                        viewModel.toggleFavorite(job.id)
+                                        println("Favorite clicked in CandidatesScreen for jobId: ${job.id}, isFavorite: $isFavorite")
+                                    },
+                                    onClick = {
+                                        val encodedJobId = URLEncoder.encode(job.id, StandardCharsets.UTF_8.toString())
+                                        val encodedTitle = URLEncoder.encode(job.title, StandardCharsets.UTF_8.toString())
+                                        val encodedCompany = URLEncoder.encode(job.company.display_name, StandardCharsets.UTF_8.toString())
+                                        val encodedLocation = URLEncoder.encode(job.location.display_name, StandardCharsets.UTF_8.toString())
+                                        val encodedModality = URLEncoder.encode(job.contract_time ?: "Não especificado", StandardCharsets.UTF_8.toString())
+                                        val encodedDescription = URLEncoder.encode(job.description, StandardCharsets.UTF_8.toString())
+                                        navController.navigate("jobDetail/$encodedJobId/$encodedTitle/$encodedCompany/$encodedLocation/$encodedModality/$encodedDescription")
+                                    }
+                                )
+                            }
                         }
-                    } else {
-                        items(filteredCompanies) { company ->
-                            val jobDetails = company.description?.split(" - ") ?: listOf("", "", "")
-                            val title = jobDetails.getOrNull(0) ?: ""
-                            val modality = jobDetails.getOrNull(1) ?: ""
-                            val salary = jobDetails.getOrNull(2) ?: ""
 
-                            JobCard(
-                                title = title,
-                                company = company.companyName,
-                                location = company.location,
-                                modality = modality,
-                                salary = salary,
-                                onClick = {
-                                    val encodedTitle =
-                                        URLEncoder.encode(title, StandardCharsets.UTF_8.toString())
-                                    val encodedCompany = URLEncoder.encode(
-                                        company.companyName,
-                                        StandardCharsets.UTF_8.toString()
-                                    )
-                                    val encodedLocation = URLEncoder.encode(
-                                        company.location,
-                                        StandardCharsets.UTF_8.toString()
-                                    )
-                                    val encodedModality = URLEncoder.encode(
-                                        modality,
-                                        StandardCharsets.UTF_8.toString()
-                                    )
-                                    val encodedSalary =
-                                        URLEncoder.encode(salary, StandardCharsets.UTF_8.toString())
-
-                                    navController.navigate(
-                                        "jobDetail/$encodedTitle/$encodedCompany/$encodedLocation/$encodedModality/$encodedSalary"
+                        item {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                IconButton(
+                                    onClick = { viewModel.previousPage() },
+                                    enabled = viewModel.currentPage > 1,
+                                    modifier = Modifier.size(48.dp)
+                                ) {
+                                    Icon(
+                                        Icons.Default.KeyboardArrowLeft,
+                                        contentDescription = "Anterior",
+                                        tint = if (viewModel.currentPage > 1) Color.White else Color.Gray
                                     )
                                 }
-                            )
+
+                                Text(
+                                    text = "${viewModel.currentPage} de ${viewModel.totalPages}",
+                                    color = Color.White,
+                                    fontSize = 16.sp,
+                                    modifier = Modifier.padding(horizontal = 16.dp)
+                                )
+
+                                IconButton(
+                                    onClick = { viewModel.nextPage() },
+                                    enabled = viewModel.currentPage < viewModel.totalPages,
+                                    modifier = Modifier.size(48.dp)
+                                ) {
+                                    Icon(
+                                        Icons.Default.KeyboardArrowRight,
+                                        contentDescription = "Próxima",
+                                        tint = if (viewModel.currentPage < viewModel.totalPages) Color.White else Color.Gray
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -200,7 +252,28 @@ fun CandidatesScreen(
                 onBriefcaseClick = { navController.navigate("BriefcaseScreen") },
                 onBellClick = { navController.navigate("NotificationsScreen") },
                 onStarClick = { navController.navigate("FavoritesScreen") }
-            )
-        }
+            )        }
     }
+}
+
+
+class CandidatesViewModelFactory(
+    private val database: AppDatabase,
+    private val isCompanyLogin: Boolean
+) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(CandidatesViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return CandidatesViewModel(database, isCompanyLogin) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+
+fun estimateAge(academyLastYear: String?): Int {
+    return academyLastYear?.toIntOrNull()?.let { lastYear ->
+        val currentYear = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)
+        val yearsSinceGraduation = currentYear - lastYear
+        22 + yearsSinceGraduation
+    } ?: 30
 }

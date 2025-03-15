@@ -1,4 +1,3 @@
-// TopHeader.kt
 package com.grupo.appandroid.components
 
 import androidx.compose.foundation.Image
@@ -8,133 +7,254 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.grupo.appandroid.R
+import com.grupo.appandroid.model.Category
 import com.grupo.appandroid.ui.theme.AmberPrimary
 import com.grupo.appandroid.ui.theme.TextWhite
 
 @Composable
 fun TopHeader(
     onSearchChange: (String) -> Unit,
+    onCategoryChange: (String) -> Unit,
     onLocationChange: (String) -> Unit,
-    onModalityChange: (String) -> Unit,
+    onResultsPerPageChange: (Int) -> Unit,
+    onAreaChange: (String) -> Unit,
+    selectedCategory: String,
     selectedLocation: String,
-    selectedModality: String
+    selectedResultsPerPage: Int,
+    selectedArea: String,
+    categories: List<Category>,
+    locations: List<String>,
+    isCompanyLogin: Boolean,
+    areas: List<String>
 ) {
     var searchText by remember { mutableStateOf("") }
+    var isCategoryExpanded by remember { mutableStateOf(false) }
     var isLocationExpanded by remember { mutableStateOf(false) }
-    var isModalityExpanded by remember { mutableStateOf(false) }
+    var isResultsPerPageExpanded by remember { mutableStateOf(false) }
+    var isAreaExpanded by remember { mutableStateOf(false) }
 
-    val locations = listOf("Todos", "São Paulo - SP", "Rio de Janeiro - RJ", "Belo Horizonte - MG", "Curitiba - PR", "Porto Alegre - RS")
-    val modalities = listOf("Todos", "Remoto", "Presencial", "Híbrido")
+    val resultsPerPageOptions = listOf(5, 10, 20)
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(AmberPrimary)
-            .padding(16.dp)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        Text(
+            text = stringResource(id = R.string.app_name),
+            color = TextWhite,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.fillMaxWidth()
+        )
+
         Row(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(
-                text = stringResource(id = R.string.app_name),
-                color = TextWhite,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
+            Box(
                 modifier = Modifier.weight(1f)
-            )
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically
             ) {
-                Box {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.White, RoundedCornerShape(4.dp))
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                        .clickable { isResultsPerPageExpanded = true }
+                ) {
+                    Text(
+                        text = "$selectedResultsPerPage por página",
+                        color = Color.Black,
+                        fontSize = 14.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                DropdownMenu(
+                    expanded = isResultsPerPageExpanded,
+                    onDismissRequest = { isResultsPerPageExpanded = false }
+                ) {
+                    resultsPerPageOptions.forEach { option ->
+                        DropdownMenuItem(
+                            text = { Text("$option por página") },
+                            onClick = {
+                                isResultsPerPageExpanded = false
+                                onResultsPerPageChange(option)
+                            }
+                        )
+                    }
+                }
+            }
+            if (!isCompanyLogin) {
+
+                Box(
+                    modifier = Modifier.weight(1f)
+                ) {
                     Box(
                         modifier = Modifier
+                            .fillMaxWidth()
                             .background(Color.White, RoundedCornerShape(4.dp))
                             .padding(horizontal = 8.dp, vertical = 4.dp)
-                            .clickable { isLocationExpanded = true }
+                            .clickable { isCategoryExpanded = true }
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = if (selectedLocation.isEmpty()) stringResource(id = R.string.location_select)
-                                else selectedLocation,
-                                color = Color.Black,
-                                fontSize = 14.sp,
-                                modifier = Modifier.padding(end = 4.dp)
-                            )
-                            Image(
-                                painter = painterResource(id = R.drawable.pin),
-                                contentDescription = "Location",
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
+                        Text(
+                            text = if (selectedCategory.isEmpty()) "Categoria"
+                            else categories.find { it.tag == selectedCategory }?.label?.let {
+                                if (it.length > 15) it.take(12) + "..." else it
+                            } ?: "Categoria",
+                            color = Color.Black,
+                            fontSize = 14.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
 
                     DropdownMenu(
-                        expanded = isLocationExpanded,
-                        onDismissRequest = { isLocationExpanded = false }
+                        expanded = isCategoryExpanded,
+                        onDismissRequest = { isCategoryExpanded = false },
+                        modifier = Modifier.widthIn(max = 200.dp)
                     ) {
-                        locations.forEach { location ->
+                        DropdownMenuItem(
+                            text = { Text("Todas") },
+                            onClick = {
+                                isCategoryExpanded = false
+                                onCategoryChange("")
+                            }
+                        )
+                        categories.forEach { category ->
                             DropdownMenuItem(
-                                text = { Text(location) },
+                                text = {
+                                    Text(
+                                        text = category.label,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                },
                                 onClick = {
-                                    isLocationExpanded = false
-                                    onLocationChange(if (location == "Todos") "" else location)
+                                    isCategoryExpanded = false
+                                    onCategoryChange(category.tag)
                                 }
                             )
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.width(8.dp))
+            }
 
-                Box {
+            Box(
+                modifier = Modifier.weight(1f)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.White, RoundedCornerShape(4.dp))
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                        .clickable { isLocationExpanded = true }
+                ) {
+                    Text(
+                        text = if (selectedLocation.isEmpty()) "Estado"
+                        else selectedLocation,
+                        color = Color.Black,
+                        fontSize = 14.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                DropdownMenu(
+                    expanded = isLocationExpanded,
+                    onDismissRequest = { isLocationExpanded = false },
+                    modifier = Modifier.widthIn(max = 200.dp)
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Todos") },
+                        onClick = {
+                            isLocationExpanded = false
+                            onLocationChange("")
+                        }
+                    )
+                    locations.forEach { state ->
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = state,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            },
+                            onClick = {
+                                isLocationExpanded = false
+                                onLocationChange(state)
+                            }
+                        )
+                    }
+                }
+            }
+
+            if (isCompanyLogin) {
+
+                Box(
+                    modifier = Modifier.weight(1f)
+                ) {
                     Box(
                         modifier = Modifier
+                            .fillMaxWidth()
                             .background(Color.White, RoundedCornerShape(4.dp))
                             .padding(horizontal = 8.dp, vertical = 4.dp)
-                            .clickable { isModalityExpanded = true }
+                            .clickable { isAreaExpanded = true }
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = if (selectedModality.isEmpty()) stringResource(id = R.string.modality)
-                                else selectedModality,
-                                color = Color.Black,
-                                fontSize = 14.sp,
-                                modifier = Modifier.padding(end = 4.dp)
-                            )
-                        }
+                        Text(
+                            text = if (selectedArea.isEmpty()) "Área" else selectedArea,
+                            color = Color.Black,
+                            fontSize = 14.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
 
                     DropdownMenu(
-                        expanded = isModalityExpanded,
-                        onDismissRequest = { isModalityExpanded = false }
+                        expanded = isAreaExpanded,
+                        onDismissRequest = { isAreaExpanded = false },
+                        modifier = Modifier.widthIn(max = 200.dp)
                     ) {
-                        modalities.forEach { modality ->
+                        DropdownMenuItem(
+                            text = { Text("Todas") },
+                            onClick = {
+                                isAreaExpanded = false
+                                onAreaChange("")
+                            }
+                        )
+                        areas.forEach { area ->
                             DropdownMenuItem(
-                                text = { Text(modality) },
+                                text = {
+                                    Text(
+                                        text = area,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                },
                                 onClick = {
-                                    isModalityExpanded = false
-                                    onModalityChange(if (modality == "Todos") "" else modality)
+                                    isAreaExpanded = false
+                                    onAreaChange(area)
                                 }
                             )
                         }
                     }
                 }
             }
+
         }
 
         TextField(
@@ -143,9 +263,7 @@ fun TopHeader(
                 searchText = it
                 onSearchChange(it)
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp),
+            modifier = Modifier.fillMaxWidth(),
             placeholder = { Text(stringResource(id = R.string.search)) },
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color.White,
