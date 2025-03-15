@@ -17,14 +17,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.grupo.appandroid.viewmodels.PersonalProfileScreenViewModel
 import com.grupo.appandroid.database.dao.AppDatabase
 import com.grupo.appandroid.ui.theme.RegistrationAppTheme
 import com.grupo.appandroid.viewmodels.CandidatesViewModel
 import com.grupo.appandroid.model.User
 import com.grupo.appandroid.views.FavoritesScreen
 import com.grupo.appandroid.views.HomeScreen
-import com.grupo.appandroid.views.JobDetailScreen
 import com.grupo.appandroid.views.LoginScreen
 import com.grupo.appandroid.views.PersonalProfileScreen
 import com.grupo.appandroid.views.RegistrationScreen
@@ -39,6 +37,7 @@ import com.grupo.appandroid.viewmodels.LoginViewModel
 import com.grupo.appandroid.viewmodels.RegistrationViewModel
 import com.grupo.appandroid.views.CandidatesScreen
 import com.grupo.appandroid.views.CandidatesViewModelFactory
+import com.grupo.appandroid.views.JobDetailScreen
 
 
 class MainActivity : ComponentActivity() {
@@ -99,7 +98,7 @@ class MainActivity : ComponentActivity() {
                         route = "FavoritesScreen",
                         enterTransition = { fadeIn(animationSpec = tween(500)) },
                         exitTransition = { fadeOut(animationSpec = tween(500)) }
-                    ){
+                    ) {
                         FavoritesScreen(navController)
                     }
                     composable(
@@ -114,7 +113,7 @@ class MainActivity : ComponentActivity() {
                         enterTransition = { fadeIn(animationSpec = tween(500)) },
                         exitTransition = { fadeOut(animationSpec = tween(500)) }
                     ) {
-                        CandidatesScreen(navController)
+                        CandidatesScreen(navController, candidatesViewModel)
                     }
                     composable(
                         route = "PersonalProfileScreen",
@@ -191,8 +190,6 @@ class MainActivity : ComponentActivity() {
                             navArgument("location") { type = NavType.StringType },
                             navArgument("modality") { type = NavType.StringType },
                             navArgument("description") { type = NavType.StringType }
-                            navArgument("role") { type = NavType.StringType },
-                            navArgument("experience") { type = NavType.StringType }
                         )
                     ) { backStackEntry ->
                         val name =
@@ -224,29 +221,6 @@ class MainActivity : ComponentActivity() {
                             academyCourse = null,
                             academyInstitution = null,
                             academyLastYear = ""
-                        )
-                        UserDetailScreen(
-                            user = user,
-                            navController = navController
-                        )
-                    ) { backStackEntry ->
-                        val jobId = URLDecoder.decode(backStackEntry.arguments?.getString("jobId") ?: "", StandardCharsets.UTF_8.toString())
-                        val title = URLDecoder.decode(backStackEntry.arguments?.getString("title") ?: "", StandardCharsets.UTF_8.toString())
-                        val company = URLDecoder.decode(backStackEntry.arguments?.getString("company") ?: "", StandardCharsets.UTF_8.toString())
-                        val location = URLDecoder.decode(backStackEntry.arguments?.getString("location") ?: "", StandardCharsets.UTF_8.toString())
-                        val modality = URLDecoder.decode(backStackEntry.arguments?.getString("modality") ?: "", StandardCharsets.UTF_8.toString())
-                        val description = URLDecoder.decode(backStackEntry.arguments?.getString("description") ?: "", StandardCharsets.UTF_8.toString())
-
-
-                        JobDetailScreen(
-                            jobId = jobId,
-                            title = title,
-                            company = company,
-                            location = location,
-                            modality = modality,
-                            description = description,
-                            navController = navController,
-                            viewModel = candidatesViewModel
                         )
                     }
                 }
