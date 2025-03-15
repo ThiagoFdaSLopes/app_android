@@ -22,10 +22,16 @@ import com.grupo.appandroid.viewmodels.CandidatesViewModel
 import com.grupo.appandroid.views.CandidatesScreen
 import com.grupo.appandroid.viewmodels.LoginViewModel
 import com.grupo.appandroid.viewmodels.RegistrationViewModel
+import com.grupo.appandroid.model.User
+import com.grupo.appandroid.ui.theme.RegistrationAppTheme
+import com.grupo.appandroid.viewmodels.LoginViewModel
+import com.grupo.appandroid.viewmodels.RegistrationViewModel
+import com.grupo.appandroid.views.FavoritesScreen
+import com.grupo.appandroid.views.HomeScreen
+import com.grupo.appandroid.views.JobDetailScreen
 import com.grupo.appandroid.views.LoginScreen
 import com.grupo.appandroid.views.RegistrationScreen
 import com.grupo.appandroid.views.UserDetailScreen
-import com.grupo.appandroid.views.JobDetailScreen
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.net.URLDecoder
@@ -33,6 +39,7 @@ import java.nio.charset.StandardCharsets
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.grupo.appandroid.database.repository.UserRepository
 import com.grupo.appandroid.views.CandidatesViewModelFactory
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,7 +51,9 @@ class MainActivity : ComponentActivity() {
             keepSplashScreen = false
         }
 
+
         enableEdgeToEdge()
+
 
         super.onCreate(savedInstanceState)
         setContent {
@@ -81,36 +90,64 @@ class MainActivity : ComponentActivity() {
                         enterTransition = { fadeIn(animationSpec = tween(500)) },
                         exitTransition = { fadeOut(animationSpec = tween(500)) }
                     ) {
-                        RegistrationScreen(navController = navController, viewModel = RegistrationViewModel())
+                        RegistrationScreen(
+                            navController = navController,
+                            viewModel = RegistrationViewModel()
+                        )
+                    }
+                    composable(
+                        route = "FavoritesScreen",
+                        enterTransition = { fadeIn(animationSpec = tween(500)) },
+                        exitTransition = { fadeOut(animationSpec = tween(500)) }
+                    ){
+                        FavoritesScreen(navController)
                     }
                     composable(
                         route = "home",
                         enterTransition = { fadeIn(animationSpec = tween(500)) },
                         exitTransition = { fadeOut(animationSpec = tween(500)) }
                     ) {
-                        CandidatesScreen(
-                            navController = navController,
-                            viewModel = candidatesViewModel // Passe o viewModel como parâmetro
-                        )
+
+                        HomeScreen(navController)
                     }
                     composable(
                         "userDetail/{userCode}/{name}/{email}/{phone}/{location}/{skills}/{description}"
                     ) { backStackEntry ->
-                        val userCode = backStackEntry.arguments?.getString("userCode")?.toLongOrNull() ?: 0L
-                        val name = URLDecoder.decode(backStackEntry.arguments?.getString("name") ?: "", StandardCharsets.UTF_8.toString())
-                        val email = URLDecoder.decode(backStackEntry.arguments?.getString("email") ?: "", StandardCharsets.UTF_8.toString())
-                        val phone = URLDecoder.decode(backStackEntry.arguments?.getString("phone") ?: "", StandardCharsets.UTF_8.toString())
-                        val location = URLDecoder.decode(backStackEntry.arguments?.getString("location") ?: "", StandardCharsets.UTF_8.toString())
-                        val skills = URLDecoder.decode(backStackEntry.arguments?.getString("skills") ?: "", StandardCharsets.UTF_8.toString())
-                        val description = URLDecoder.decode(backStackEntry.arguments?.getString("description") ?: "", StandardCharsets.UTF_8.toString())
+                        val userCode =
+                            backStackEntry.arguments?.getString("userCode")?.toLongOrNull() ?: 0L
+                        val name = URLDecoder.decode(
+                            backStackEntry.arguments?.getString("name") ?: "",
+                            StandardCharsets.UTF_8.toString()
+                        )
+                        val email = URLDecoder.decode(
+                            backStackEntry.arguments?.getString("email") ?: "",
+                            StandardCharsets.UTF_8.toString()
+                        )
+                        val phone = URLDecoder.decode(
+                            backStackEntry.arguments?.getString("phone") ?: "",
+                            StandardCharsets.UTF_8.toString()
+                        )
+                        val location = URLDecoder.decode(
+                            backStackEntry.arguments?.getString("location") ?: "",
+                            StandardCharsets.UTF_8.toString()
+                        )
+                        val skills = URLDecoder.decode(
+                            backStackEntry.arguments?.getString("skills") ?: "",
+                            StandardCharsets.UTF_8.toString()
+                        )
+                        val description = URLDecoder.decode(
+                            backStackEntry.arguments?.getString("description") ?: "",
+                            StandardCharsets.UTF_8.toString()
+                        )
+
 
                         val user = User(
                             userCode = userCode,
                             name = name,
                             email = email,
                             phone = phone,
-                            password = "",
-                            document = "",
+                            password = "", // Not needed for display
+                            document = "", // Not needed for display
                             location = location,
                             skills = skills,
                             description = description,
@@ -125,6 +162,7 @@ class MainActivity : ComponentActivity() {
                             viewModel = candidatesViewModel // Passe o viewModel
                         )
                     }
+                    // Fix candidate details route
                     composable(
                         "jobDetail/{jobId}/{title}/{company}/{location}/{modality}/{description}",
                         arguments = listOf(
@@ -142,6 +180,7 @@ class MainActivity : ComponentActivity() {
                         val location = URLDecoder.decode(backStackEntry.arguments?.getString("location") ?: "", StandardCharsets.UTF_8.toString())
                         val modality = URLDecoder.decode(backStackEntry.arguments?.getString("modality") ?: "", StandardCharsets.UTF_8.toString())
                         val description = URLDecoder.decode(backStackEntry.arguments?.getString("description") ?: "", StandardCharsets.UTF_8.toString())
+
 
                         JobDetailScreen(
                             jobId = jobId,

@@ -202,9 +202,15 @@ fun UserDetailScreen(
                     fontSize = 16.sp
                 )
             }
-
-            NavigationBar()
         }
+
+        NavigationBar(
+            onSettingsClick = { navController.navigate("SettingsScreen") },
+            onPeopleClick = { navController.navigate("PeopleScreen") },
+            onBriefcaseClick = { navController.navigate("BriefcaseScreen") },
+            onBellClick = { navController.navigate("NotificationsScreen") },
+            onStarClick = { navController.navigate("FavoritesScreen") }
+        )
     }
 }
 @Composable
@@ -297,9 +303,15 @@ fun JobDetailScreen(
             ) {
                 Text("CANDIDATAR-SE", color = Color.Black)
             }
-
-            NavigationBar()
         }
+
+        NavigationBar(
+            onSettingsClick = { navController.navigate("SettingsScreen") },
+            onPeopleClick = { navController.navigate("PeopleScreen") },
+            onBriefcaseClick = { navController.navigate("BriefcaseScreen") },
+            onBellClick = { navController.navigate("NotificationsScreen") },
+            onStarClick = { navController.navigate("FavoritesScreen") }
+        )
     }
 
     JobApplicationModal(
