@@ -1,5 +1,6 @@
 package com.grupo.appandroid
 
+import FavoritesScreen
 import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -21,7 +22,6 @@ import com.grupo.appandroid.database.dao.AppDatabase
 import com.grupo.appandroid.ui.theme.RegistrationAppTheme
 import com.grupo.appandroid.viewmodels.CandidatesViewModel
 import com.grupo.appandroid.model.User
-import com.grupo.appandroid.views.FavoritesScreen
 import com.grupo.appandroid.views.HomeScreen
 import com.grupo.appandroid.views.LoginScreen
 import com.grupo.appandroid.views.PersonalProfileScreen
@@ -32,12 +32,12 @@ import kotlinx.coroutines.launch
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.grupo.appandroid.database.repository.CompanyRepository
 import com.grupo.appandroid.database.repository.UserRepository
 import com.grupo.appandroid.viewmodels.LoginViewModel
 import com.grupo.appandroid.viewmodels.RegistrationViewModel
 import com.grupo.appandroid.views.CandidatesScreen
 import com.grupo.appandroid.views.CandidatesViewModelFactory
-import com.grupo.appandroid.views.JobDetailScreen
 
 
 class MainActivity : ComponentActivity() {
@@ -99,14 +99,14 @@ class MainActivity : ComponentActivity() {
                         enterTransition = { fadeIn(animationSpec = tween(500)) },
                         exitTransition = { fadeOut(animationSpec = tween(500)) }
                     ) {
-                        FavoritesScreen(navController)
+                        FavoritesScreen(navController, isCompany = isCompanyLogin)
                     }
                     composable(
                         route = "home",
                         enterTransition = { fadeIn(animationSpec = tween(500)) },
                         exitTransition = { fadeOut(animationSpec = tween(500)) }
                     ) {
-                        HomeScreen(navController, loginViewModel = LoginViewModel())
+                        HomeScreen(navController, loginViewModel = LoginViewModel(), isCompanyLogin = isCompanyLogin)
                     }
                     composable(
                         route = "VagasScreen",
@@ -127,6 +127,19 @@ class MainActivity : ComponentActivity() {
 
                         val user = userRepository.findUserByEmail(email = email.toString())
                         PersonalProfileScreen(user = user!!, navController = navController)
+                    }
+                    composable(
+                        route = "CompanyProfileScreen",
+                        enterTransition = { fadeIn(animationSpec = tween(500)) },
+                        exitTransition = { fadeOut(animationSpec = tween(500)) }
+                    ) {
+                        val context = LocalContext.current
+                        val prefs = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
+                        val email = prefs.getString("loggedInEmail", null)
+                        val companyRepository = CompanyRepository(context)
+
+                        val company = companyRepository.findByEmail(email = email.toString())
+                        PersonalProfileScreen(company = company!!, navController = navController)
                     }
                     composable(
                         "userDetail/{userCode}/{name}/{email}/{phone}/{location}/{skills}/{description}"

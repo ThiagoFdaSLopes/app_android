@@ -31,4 +31,7 @@ interface CompanyDAO {
 
     @Insert
     fun insertAll(companies: List<Company>)
+
+    @Query("SELECT * FROM company WHERE email = :email")
+    fun findCompanyByEmail(email: String): Company?
 }

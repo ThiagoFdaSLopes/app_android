@@ -34,4 +34,8 @@ class CompanyRepository(context: Context) {
         return db.findCompanyByEmailAndPassword(email, password)
     }
 
+    fun findByEmail(email: String): Company? {
+        return db.findCompanyByEmail(email = email)
+    }
+
 }
