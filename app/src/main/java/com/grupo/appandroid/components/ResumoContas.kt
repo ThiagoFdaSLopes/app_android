@@ -38,19 +38,5 @@ fun ResumoConta(modifier: Modifier = Modifier) {
             fontSize = 18.sp,
             textAlign = TextAlign.Center,
         )
-        Spacer(modifier = Modifier.height(5.dp))
-        Text(
-            text = "Seu perfil foi visto por 0 empresas",
-            color = TextWhite,
-            fontSize = 18.sp,
-            textAlign = TextAlign.Center,
-        )
-        Spacer(modifier = Modifier.height(5.dp))
-        Text(
-            text = "Há 0 vagas que batem com o seu perfil",
-            color = TextWhite,
-            fontSize = 18.sp,
-            textAlign = TextAlign.Center,
-        )
     }
 }
