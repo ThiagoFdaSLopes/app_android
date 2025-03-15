@@ -1,5 +1,6 @@
 package com.grupo.appandroid
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -7,6 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavType
@@ -14,14 +16,18 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.grupo.appandroid.database.repository.UserRepository
 import com.grupo.appandroid.model.User
 import com.grupo.appandroid.ui.theme.RegistrationAppTheme
 import com.grupo.appandroid.viewmodels.LoginViewModel
+import com.grupo.appandroid.viewmodels.PersonalProfileScreenViewModel
 import com.grupo.appandroid.viewmodels.RegistrationViewModel
+import com.grupo.appandroid.views.CandidatesScreen
 import com.grupo.appandroid.views.FavoritesScreen
 import com.grupo.appandroid.views.HomeScreen
 import com.grupo.appandroid.views.JobDetailScreen
 import com.grupo.appandroid.views.LoginScreen
+import com.grupo.appandroid.views.PersonalProfileScreen
 import com.grupo.appandroid.views.RegistrationScreen
 import com.grupo.appandroid.views.UserDetailScreen
 import kotlinx.coroutines.delay
@@ -81,8 +87,27 @@ class MainActivity : ComponentActivity() {
                         enterTransition = { fadeIn(animationSpec = tween(500)) },
                         exitTransition = { fadeOut(animationSpec = tween(500)) }
                     ) {
-//                        CandidatesScreen(navController = navController)
-                        HomeScreen(navController)
+                        HomeScreen(navController, loginViewModel = LoginViewModel())
+                    }
+                    composable(
+                        route = "VagasScreen",
+                        enterTransition = { fadeIn(animationSpec = tween(500)) },
+                        exitTransition = { fadeOut(animationSpec = tween(500)) }
+                    ) {
+                        CandidatesScreen(navController)
+                    }
+                    composable(
+                        route = "PersonalProfileScreen",
+                        enterTransition = { fadeIn(animationSpec = tween(500)) },
+                        exitTransition = { fadeOut(animationSpec = tween(500)) }
+                    ) {
+                        val context = LocalContext.current
+                        val prefs = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
+                        val email = prefs.getString("loggedInEmail", null)
+                        val userRepository = UserRepository(context)
+
+                        val user = userRepository.findUserByEmail(email = email.toString())
+                        PersonalProfileScreen(user = user!!, navController = navController)
                     }
                     composable(
                         "userDetail/{userCode}/{name}/{email}/{phone}/{location}/{skills}/{description}"
@@ -128,7 +153,7 @@ class MainActivity : ComponentActivity() {
                             academyLevel = null,
                             academyCourse = null,
                             academyInstitution = null,
-                            academyLastYear = null
+                            academyLastYear = ""
                         )
                         UserDetailScreen(
                             user = user,
@@ -175,7 +200,7 @@ class MainActivity : ComponentActivity() {
                             academyLevel = null,
                             academyCourse = null,
                             academyInstitution = null,
-                            academyLastYear = null
+                            academyLastYear = ""
                         )
 
 
