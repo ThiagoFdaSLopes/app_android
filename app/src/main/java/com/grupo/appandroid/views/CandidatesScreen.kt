@@ -27,6 +27,7 @@ import com.grupo.appandroid.components.JobCard
 import com.grupo.appandroid.components.LoadingIndicator
 import com.grupo.appandroid.components.TopHeader
 import com.grupo.appandroid.database.dao.AppDatabase
+import com.grupo.appandroid.database.repository.CompanyRepository
 import com.grupo.appandroid.model.BrazilianStates
 import com.grupo.appandroid.ui.theme.DarkBackground
 import com.grupo.appandroid.viewmodels.CandidatesViewModel
@@ -44,9 +45,16 @@ fun CandidatesScreen(
     val prefs = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
     val isCompanyLogin = prefs.getString("loginType", null) == "company"
     val userRepository = UserRepository(context)
+    val companyRepository = CompanyRepository(context)
     val email = prefs.getString("loggedInEmail", null)
     val user = userRepository.findUserByEmail(email = email!!)
-    val userCode = user?.userCode
+    val company = companyRepository.findByEmail(email)
+    var code = ""
+    if(isCompanyLogin) {
+        code = company?.companyCode.toString()
+    } else {
+        code = user?.userCode.toString()
+    }
     val database = AppDatabase.getDatabase(context)
 
     val viewModel: CandidatesViewModel = viewModel(
@@ -55,12 +63,14 @@ fun CandidatesScreen(
     )
 
     LaunchedEffect(Unit) {
-        if (userCode != null) {
-            viewModel.setUserCode(userCode.toString())
+        if (code != null) {
+            viewModel.setUserCode(code)
+            println("CandidatesScreen - Setting userCode: $code")
             println("CandidatesScreen - Initial favoriteCandidates: ${viewModel.favoriteCandidates}")
+        } else {
+            println("CandidatesScreen - userCode is null for email: $email")
         }
     }
-
     val filteredUsers by remember(
         viewModel.searchQuery,
         viewModel.selectedLocation,

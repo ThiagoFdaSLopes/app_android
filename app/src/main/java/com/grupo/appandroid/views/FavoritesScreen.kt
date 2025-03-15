@@ -93,6 +93,10 @@ fun FavoritesScreen(
             horizontalAlignment = Alignment.Start
         ) {
             val titleText = if (isCompany) "Candidatos Favoritados" else "Vagas Favoritadas"
+            println("TITULO ABAIXO")
+            println(titleText)
+            println("IS COMPANY? ABAIXO")
+            println(isCompany)
             Text(
                 text = titleText,
                 color = TextWhite,
