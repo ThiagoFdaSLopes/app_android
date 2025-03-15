@@ -16,16 +16,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.grupo.appandroid.database.dao.AppDatabase
-import com.grupo.appandroid.model.User
 import com.grupo.appandroid.ui.theme.RegistrationAppTheme
 import com.grupo.appandroid.viewmodels.CandidatesViewModel
-import com.grupo.appandroid.views.CandidatesScreen
-import com.grupo.appandroid.viewmodels.LoginViewModel
-import com.grupo.appandroid.viewmodels.RegistrationViewModel
 import com.grupo.appandroid.model.User
-import com.grupo.appandroid.ui.theme.RegistrationAppTheme
-import com.grupo.appandroid.viewmodels.LoginViewModel
-import com.grupo.appandroid.viewmodels.RegistrationViewModel
 import com.grupo.appandroid.views.FavoritesScreen
 import com.grupo.appandroid.views.HomeScreen
 import com.grupo.appandroid.views.JobDetailScreen
@@ -38,6 +31,9 @@ import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.grupo.appandroid.database.repository.UserRepository
+import com.grupo.appandroid.viewmodels.LoginViewModel
+import com.grupo.appandroid.viewmodels.RegistrationViewModel
+import com.grupo.appandroid.views.CandidatesScreen
 import com.grupo.appandroid.views.CandidatesViewModelFactory
 
 
@@ -107,8 +103,7 @@ class MainActivity : ComponentActivity() {
                         enterTransition = { fadeIn(animationSpec = tween(500)) },
                         exitTransition = { fadeOut(animationSpec = tween(500)) }
                     ) {
-
-                        HomeScreen(navController)
+                      HomeScreen(navController)
                     }
                     composable(
                         "userDetail/{userCode}/{name}/{email}/{phone}/{location}/{skills}/{description}"

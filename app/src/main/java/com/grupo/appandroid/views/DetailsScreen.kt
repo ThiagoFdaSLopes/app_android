@@ -49,7 +49,6 @@ fun UserDetailScreen(
 
     val viewModel: CandidatesViewModel = viewModel(
         viewModelStoreOwner = navController.getViewModelStoreOwner(navController.graph.id),
-        factory = CandidatesViewModelFactory(database, isCompanyLogin)
     )
 
     val isFavorite by remember(viewModel.favoriteCandidates) {

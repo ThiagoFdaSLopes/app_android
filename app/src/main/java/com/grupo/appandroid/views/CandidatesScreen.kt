@@ -20,9 +20,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import com.grupo.appandroid.componentes.NavigationBar
 import com.grupo.appandroid.components.CandidateCard
@@ -91,9 +88,9 @@ fun CandidatesScreen(
                 val matchesLocation = viewModel.selectedLocation.isEmpty() ||
                         job.location.display_name.contains(viewModel.selectedLocation, ignoreCase = true)
                 matchesSearch && matchesLocation
-
             }
         }
+    }
 
     Box(
         modifier = modifier
@@ -255,8 +252,7 @@ fun CandidatesScreen(
                 onBriefcaseClick = { navController.navigate("BriefcaseScreen") },
                 onBellClick = { navController.navigate("NotificationsScreen") },
                 onStarClick = { navController.navigate("FavoritesScreen") }
-            )
-        }
+            )        }
     }
 }
 
@@ -280,5 +276,4 @@ fun estimateAge(academyLastYear: String?): Int {
         val yearsSinceGraduation = currentYear - lastYear
         22 + yearsSinceGraduation
     } ?: 30
-
 }
