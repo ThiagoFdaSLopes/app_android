@@ -1,5 +1,6 @@
 package com.grupo.appandroid.views
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -18,10 +19,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -33,11 +36,19 @@ import com.grupo.appandroid.componentes.NavigationBar
 import com.grupo.appandroid.components.Dicas
 import com.grupo.appandroid.components.MenuIcon
 import com.grupo.appandroid.components.ResumoConta
+import com.grupo.appandroid.database.repository.UserRepository
 import com.grupo.appandroid.ui.theme.DarkBackground
 import com.grupo.appandroid.ui.theme.TextWhite
+import com.grupo.appandroid.viewmodels.LoginViewModel
 
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(navController: NavController, loginViewModel: LoginViewModel) {
+    val context = LocalContext.current
+    val prefs = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
+    val email = prefs.getString("loggedInEmail", null)
+    val userRepository = UserRepository(context)
+
+    val user = userRepository.findUserByEmail(email = email.toString())
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -54,23 +65,11 @@ fun HomeScreen(navController: NavController) {
             // Box para alinhar a foto de perfil
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxWidth().height(100.dp)
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.fotoperfil),
-                    contentDescription = "Foto de perfil",
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .size(80.dp)
-                        .clip(CircleShape)
-                        .align(Alignment.TopEnd),
-                    contentScale = ContentScale.Crop // Garante que a imagem se ajuste corretamente ao formato
-                )
-
-
                 // Texto de boas-vindas
                 Text(
-                    text = "Olá,\nCandidato",
+                    text = "Olá, ${user?.name}",
                     color = TextWhite,
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
@@ -79,9 +78,6 @@ fun HomeScreen(navController: NavController) {
                         .padding(top = 16.dp, start = 16.dp) // Ajuste de espaço abaixo da foto
                 )
             }
-            Spacer(modifier = Modifier.height(7.dp)) // Espaço entre texto e ícones
-
-
             // Menu com ícones (organizado em Column e Rows)
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -94,41 +90,17 @@ fun HomeScreen(navController: NavController) {
                     MenuIcon(
                         icon = R.drawable.icon_suitcases,
                         label = ""
-                    ) { navController.navigate("candidateDetail/{name}/{age}/{location}/{role}/{experience}") }
+                    ) { navController.navigate("VagasScreen") }
                     MenuIcon(
                         icon = R.drawable.heart,
                         label = ""
                     ) { navController.navigate("FavoritesScreen") }
                     MenuIcon(
-                        icon = R.drawable.icon_bell,
-                        label = ""
-                    ) { navController.navigate("NotificationsScreen") }
-                }
-
-
-                Spacer(modifier = Modifier.height(1.dp)) // Espaço entre as linhas de ícones
-
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    MenuIcon(
-                        icon = R.drawable.icon_upload,
-                        label = ""
-                    ) { navController.navigate("UploadScreen") }
-                    MenuIcon(
                         icon = R.drawable.icon_people,
                         label = ""
-                    ) { navController.navigate("UsersScreen") }
-                    MenuIcon(
-                        icon = R.drawable.icon_message,
-                        label = ""
-                    ) { navController.navigate("MessagesScreen") }
+                    ) { navController.navigate("PersonalProfileScreen") }
                 }
-                Spacer(modifier = Modifier.height(5.dp)) // Espaço entre as ícones e resumo da conta
-
-
+                Spacer(modifier = Modifier.height(1.dp)) // Espaço entre as linhas de ícones
                 // Resumo da conta (Descrições)
                 Column(
                     modifier = Modifier.fillMaxWidth(),
@@ -138,20 +110,6 @@ fun HomeScreen(navController: NavController) {
 
                 }
                 Spacer(modifier = Modifier.height(8.dp))
-                // Dicas para o usuário
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-//                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 80.dp)
-                ) {
-                    Dicas(
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-                Spacer(modifier = Modifier.height(20.dp))
-
-
             }
         }
         // NavigationBar
