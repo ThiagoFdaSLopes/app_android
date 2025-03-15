@@ -150,6 +150,24 @@ fun PersonalProfileScreen(user: User, navController: NavController) {
                     color = Color.White
                 )
             }
+            Spacer(modifier = Modifier.height(5.dp))
+            Button(
+                onClick = {
+                    navController.navigate("home")
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 24.dp)
+                    .height(48.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = AmberPrimary),
+                shape = RoundedCornerShape(4.dp)
+            ) {
+                Text(
+                    text = "Voltar",
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+            }
             MinimalDialog(
                 onDismissRequest = {},
                 onConfirmation = { viewModel.showSuccess.value = false
