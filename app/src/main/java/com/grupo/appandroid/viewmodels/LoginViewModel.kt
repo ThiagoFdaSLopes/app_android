@@ -1,5 +1,6 @@
 package com.grupo.appandroid.viewmodels
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -20,8 +21,20 @@ class LoginViewModel : ViewModel() {
         private val _errorMessage = MutableLiveData<String>()
         val errorMessage: LiveData<String> = _errorMessage
 
-        private val _loginSuccess = MutableLiveData<LoginResult>()
-        val loginSuccess: LiveData<LoginResult> = _loginSuccess
+        private val _loginSuccess = MutableLiveData<LoginResult?>()
+        val loginSuccess: MutableLiveData<LoginResult?> = _loginSuccess
+
+        fun logout(context: Context) {
+                val prefs = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
+                prefs.edit()
+                        .clear()
+                        .apply()
+
+                _email.value = ""
+                _password.value = ""
+                _loginSuccess.value = null
+                _errorMessage.value = ""
+        }
 
         fun updateEmail(value: String) {
                 _email.value = value

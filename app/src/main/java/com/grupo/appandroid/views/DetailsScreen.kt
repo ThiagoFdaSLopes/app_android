@@ -35,6 +35,7 @@ import com.grupo.appandroid.database.dao.AppDatabase
 import com.grupo.appandroid.database.repository.UserRepository
 import com.grupo.appandroid.model.User
 import com.grupo.appandroid.viewmodels.CandidatesViewModel
+import com.grupo.appandroid.viewmodels.LoginViewModel
 
 @Composable
 fun UserDetailScreen(
@@ -54,6 +55,9 @@ fun UserDetailScreen(
     val isFavorite by remember(viewModel.favoriteCandidates) {
         derivedStateOf { viewModel.favoriteCandidates.contains(user.userCode.toString()) }
     }
+
+    val loginViewModel = LoginViewModel()
+
 
     LaunchedEffect(Unit) {
         val userCode = prefs.getString("loggedInEmail", null)?.let { email ->
@@ -203,13 +207,8 @@ fun UserDetailScreen(
             }
         }
 
-        NavigationBar(
-            onSettingsClick = { navController.navigate("SettingsScreen") },
-            onPeopleClick = { navController.navigate("PeopleScreen") },
-            onBriefcaseClick = { navController.navigate("BriefcaseScreen") },
-            onBellClick = { navController.navigate("NotificationsScreen") },
-            onStarClick = { navController.navigate("FavoritesScreen") }
-        )
+        NavigationBar(navController = navController)
+
     }
 }
 @Composable
@@ -224,6 +223,8 @@ fun JobDetailScreen(
     viewModel: CandidatesViewModel
 ) {
     var showApplicationModal by remember { mutableStateOf(false) }
+    val loginViewModel = LoginViewModel()
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -304,13 +305,8 @@ fun JobDetailScreen(
             }
         }
 
-        NavigationBar(
-            onSettingsClick = { navController.navigate("SettingsScreen") },
-            onPeopleClick = { navController.navigate("PeopleScreen") },
-            onBriefcaseClick = { navController.navigate("BriefcaseScreen") },
-            onBellClick = { navController.navigate("NotificationsScreen") },
-            onStarClick = { navController.navigate("FavoritesScreen") }
-        )
+        NavigationBar(navController = navController)
+
     }
 
     JobApplicationModal(
