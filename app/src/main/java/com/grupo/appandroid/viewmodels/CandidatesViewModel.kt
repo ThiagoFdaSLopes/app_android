@@ -1,6 +1,7 @@
 package com.grupo.appandroid.viewmodels
 
 import Job
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -52,6 +53,7 @@ class CandidatesViewModel(
     var favoriteCandidates by mutableStateOf<Set<String>>(emptySet())
         private set
     init {
+        Log.d("isCompanyLogin", "isCompanyLogin: ${isCompanyLogin}")
         if (isCompanyLogin) {
             fetchUsers(1)
         } else {

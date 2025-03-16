@@ -1,6 +1,5 @@
 package com.grupo.appandroid.views
 
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -30,10 +29,11 @@ import com.grupo.appandroid.components.LoadingIndicator
 import com.grupo.appandroid.components.TopHeader
 import com.grupo.appandroid.database.dao.AppDatabase
 import com.grupo.appandroid.database.repository.CompanyRepository
+import com.grupo.appandroid.database.repository.UserRepository
 import com.grupo.appandroid.model.BrazilianStates
 import com.grupo.appandroid.ui.theme.DarkBackground
+import com.grupo.appandroid.utils.SessionManager
 import com.grupo.appandroid.viewmodels.CandidatesViewModel
-import com.grupo.appandroid.database.repository.UserRepository
 import com.grupo.appandroid.viewmodels.LoginViewModel
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -45,15 +45,26 @@ fun CandidatesScreen(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val prefs = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
-    val isCompanyLogin = prefs.getString("loginType", null) == "company"
+    // Usando o SessionManager para recuperar dados da sessão
+    val sessionManager = SessionManager(context)
+    val isCompanyLogin = sessionManager.isCompanyLogin()
+    val email = sessionManager.getLoggedInEmail()
+
+    // Se o email não estiver disponível, redirecione ou exiba mensagem
+    if (email == null) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(text = "Sessão expirada. Faça login novamente.", color = Color.White)
+        }
+        return
+    }
+
     val userRepository = UserRepository(context)
     val companyRepository = CompanyRepository(context)
-    val email = prefs.getString("loggedInEmail", null)
-    val user = userRepository.findUserByEmail(email = email!!)
+    val user = userRepository.findUserByEmail(email = email)
     val company = companyRepository.findByEmail(email)
+
     var code = ""
-    if(isCompanyLogin) {
+    if (isCompanyLogin) {
         code = company?.companyCode.toString()
     } else {
         code = user?.userCode.toString()
@@ -68,7 +79,7 @@ fun CandidatesScreen(
     val loginViewModel = LoginViewModel()
 
     LaunchedEffect(Unit) {
-        if (code != null) {
+        if (code.isNotEmpty()) {
             viewModel.setUserCode(code)
             println("CandidatesScreen - Setting userCode: $code")
             println("CandidatesScreen - Initial favoriteCandidates: ${viewModel.favoriteCandidates}")
@@ -86,7 +97,8 @@ fun CandidatesScreen(
         derivedStateOf {
             viewModel.users.filter { user ->
                 val matchesSearch = user.name.contains(viewModel.searchQuery, ignoreCase = true)
-                val matchesLocation = viewModel.selectedLocation.isEmpty() || user.location.contains(viewModel.selectedLocation, ignoreCase = true)
+                val matchesLocation = viewModel.selectedLocation.isEmpty() ||
+                        user.location.contains(viewModel.selectedLocation, ignoreCase = true)
                 val matchesArea = viewModel.selectedArea.isEmpty() ||
                         (user.academyCourse?.contains(viewModel.selectedArea, ignoreCase = true) == true) ||
                         (user.skills.contains(viewModel.selectedArea, ignoreCase = true))
@@ -262,12 +274,9 @@ fun CandidatesScreen(
             }
 
             NavigationBar(navController = navController)
-
         }
         IconButton(
-            onClick = {
-                navController.navigate("home")
-            },
+            onClick = { navController.navigate("home") },
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(14.dp)
@@ -281,7 +290,6 @@ fun CandidatesScreen(
         }
     }
 }
-
 
 class CandidatesViewModelFactory(
     private val database: AppDatabase,
