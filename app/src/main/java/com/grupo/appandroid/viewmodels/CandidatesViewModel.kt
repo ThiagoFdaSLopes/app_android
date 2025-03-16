@@ -1,6 +1,5 @@
 package com.grupo.appandroid.viewmodels
 
-import Job
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -9,25 +8,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.grupo.appandroid.database.dao.AppDatabase
 import com.grupo.appandroid.database.dao.FavoriteCandidate
-import com.grupo.appandroid.database.dao.FavoriteJob
 import com.grupo.appandroid.model.Category
 import com.grupo.appandroid.model.User
-import com.grupo.appandroid.service.RetrofitClient
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class CandidatesViewModel(
-    private val database: AppDatabase,
-    private val isCompanyLogin: Boolean
+    private val database: AppDatabase
 ) : ViewModel() {
 
     var users by mutableStateOf<List<User>>(emptyList())
-        private set
-    var jobs by mutableStateOf<List<Job>>(emptyList())
-        private set
-    var categories by mutableStateOf<List<Category>>(emptyList())
         private set
     var isLoading by mutableStateOf(true)
         private set
@@ -37,92 +28,42 @@ class CandidatesViewModel(
         private set
     var totalPages by mutableStateOf(1)
         private set
+    var categories by mutableStateOf<List<Category>>(emptyList())
     var searchQuery by mutableStateOf("")
     var selectedLocation by mutableStateOf("")
-    var selectedCategory by mutableStateOf("")
     var selectedArea by mutableStateOf("")
     var resultsPerPage by mutableStateOf(20)
+    var selectedCategory by mutableStateOf("")
+    private var companyCode = ""
 
-    private val userDao = database.userDao()
-    private val favoriteDao = database.favoriteDao()
-    private val favoriteCandidateDao = database.favoriteCandidateDao()
-    private var userCode = ""
-
-    var favorites by mutableStateOf<Set<String>>(emptySet())
-        private set
     var favoriteCandidates by mutableStateOf<Set<String>>(emptySet())
         private set
+
+    private val userDao = database.userDao()
+    private val favoriteCandidateDao = database.favoriteCandidateDao()
+
     init {
-        Log.d("isCompanyLogin", "isCompanyLogin: ${isCompanyLogin}")
-        if (isCompanyLogin) {
-            fetchUsers(1)
-        } else {
-            loadCategories()
-            fetchJobs(1)
-        }
+        fetchUsers(1)
     }
 
-    fun setUserCode(code: String) {
-        userCode = code
-        println("CandidatesViewModel - userCode set to: $userCode")
-        if (isCompanyLogin) {
-            loadFavoriteCandidates()
-        } else {
-            loadFavorites()
-        }
-    }
-
-    private fun loadFavorites() {
-        viewModelScope.launch {
-            favoriteDao.getFavoritesByUser(userCode).collectLatest { favoritesList ->
-                favorites = favoritesList.map { it.jobId }.toSet()
-                println("Favorites loaded: $favorites")
-            }
-        }
+    fun setCompanyCode(code: String) {
+        companyCode = code
+        fetchUsers(1)
+        loadFavoriteCandidates()
     }
 
     private fun loadFavoriteCandidates() {
         viewModelScope.launch {
-            favoriteCandidateDao.getFavoritesByCompany(userCode).collect { favoriteCandidatesList ->
+            favoriteCandidateDao.getFavoritesByCompany(companyCode).collect { favoriteCandidatesList ->
                 favoriteCandidates = favoriteCandidatesList.map { it.userCode }.toSet()
-                println("Favorite candidates updated: $favoriteCandidates")
+                Log.d("CandidatesViewModel", "Favorite candidates updated: $favoriteCandidates")
             }
         }
     }
 
-    fun toggleFavorite(id: String) {
-        if (isCompanyLogin) {
-            toggleFavoriteCandidate(id)
-        } else {
-            toggleFavoriteJob(id)
-        }
-    }
-
-    private fun toggleFavoriteJob(jobId: String) {
+    fun toggleFavoriteCandidate(userCode: String) {
         viewModelScope.launch {
             try {
-                val isCurrentlyFavorite = favorites.contains(jobId)
-                if (isCurrentlyFavorite) {
-                    favoriteDao.delete(FavoriteJob(userCode, jobId))
-                    favorites = favorites - jobId
-                } else {
-                    favoriteDao.insert(FavoriteJob(userCode, jobId))
-                    favorites = favorites + jobId
-                }
-                println("Toggled favorite job: $jobId, new favorites: $favorites")
-            } catch (e: Exception) {
-                error = "Error toggling favorite job: ${e.message}"
-            }
-        }
-    }
-
-
-
-    private fun toggleFavoriteCandidate(userCode: String) {
-        viewModelScope.launch {
-            try {
-                val companyCode = this@CandidatesViewModel.userCode
-                println("toggleFavoriteCandidate - companyCode: $companyCode, userCode: $userCode")
                 val isFavorite = favoriteCandidateDao.isFavorite(companyCode, userCode)
                 if (isFavorite) {
                     favoriteCandidateDao.delete(FavoriteCandidate(companyCode, userCode))
@@ -131,52 +72,53 @@ class CandidatesViewModel(
                     favoriteCandidateDao.insert(FavoriteCandidate(companyCode, userCode))
                     favoriteCandidates = favoriteCandidates + userCode
                 }
-                println("toggleFavoriteCandidate - Toggled $userCode, new favorites: $favoriteCandidates")
             } catch (e: Exception) {
                 error = "Error toggling favorite candidate: ${e.message}"
             }
         }
     }
+
     fun updateSearchQuery(query: String) {
         searchQuery = query
     }
 
     fun updateLocation(location: String) {
         selectedLocation = location
-        if (isCompanyLogin) fetchUsers(1)
-    }
-
-    fun updateCategory(category: String) {
-        selectedCategory = category
-        currentPage = 1
-        if (!isCompanyLogin) fetchJobs(1)
+        fetchUsers(1)
     }
 
     fun updateArea(area: String) {
         selectedArea = area
         currentPage = 1
-        if (isCompanyLogin) fetchUsers(1)
+        fetchUsers(1)
     }
 
     fun updateResultsPerPage(results: Int) {
         resultsPerPage = results
         currentPage = 1
-        if (isCompanyLogin) fetchUsers(1) else fetchJobs(1)
+        fetchUsers(1)
     }
 
     fun nextPage() {
         if (currentPage < totalPages) {
             currentPage++
-            if (isCompanyLogin) fetchUsers(currentPage) else fetchJobs(currentPage)
+            fetchUsers(currentPage)
         }
     }
 
     fun previousPage() {
         if (currentPage > 1) {
             currentPage--
-            if (isCompanyLogin) fetchUsers(currentPage) else fetchJobs(currentPage)
+            fetchUsers(currentPage)
         }
     }
+
+    fun updateCategory(category: String) {
+        selectedCategory = category
+        currentPage = 1
+        fetchUsers(1)
+    }
+
 
     private fun fetchUsers(page: Int) {
         viewModelScope.launch {
@@ -195,47 +137,6 @@ class CandidatesViewModel(
                 error = "Erro ao buscar usuários: ${e.message}"
             } finally {
                 isLoading = false
-            }
-        }
-    }
-
-    private fun fetchJobs(page: Int) {
-        viewModelScope.launch {
-            isLoading = true
-            error = null
-            try {
-                val response = RetrofitClient.jobService.searchJobs(
-                    page = page,
-                    category = selectedCategory.takeIf { it.isNotEmpty() },
-                    resultsPerPage = resultsPerPage
-                )
-                if (response.isSuccessful) {
-                    response.body()?.let { jobResponse ->
-                        jobs = jobResponse.results ?: emptyList()
-                        val totalResults = jobResponse.count ?: 0
-                        totalPages = (totalResults + (resultsPerPage - 1)) / resultsPerPage
-                        if (totalPages == 0) totalPages = 1
-                    }
-                } else {
-                    error = "Failed to fetch jobs: ${response.errorBody()?.string()}"
-                }
-            } catch (e: Exception) {
-                error = "Error: ${e.message}"
-            } finally {
-                isLoading = false
-            }
-        }
-    }
-
-    private fun loadCategories() {
-        viewModelScope.launch {
-            try {
-                val response = RetrofitClient.jobService.getCategories()
-                if (response.isSuccessful) {
-                    categories = response.body()?.results ?: emptyList()
-                }
-            } catch (e: Exception) {
-                error = "Error fetching categories: ${e.message}"
             }
         }
     }
