@@ -103,11 +103,11 @@ fun HomeScreen(
                     MenuIcon(
                         icon = R.drawable.icon_suitcases,
                         label = ""
-                    ) { navController.navigate("VagasScreen") }
+                    ) { navController.navigate(if(!isCompanyLogin) "VagasScreen" else "CandidatesScreen") }
                     MenuIcon(
                         icon = R.drawable.heart,
                         label = ""
-                    ) { navController.navigate("FavoritesScreen") }
+                    ) { navController.navigate("FavoritesScreen")}
                     MenuIcon(
                         icon = R.drawable.icon_people,
                         label = ""
