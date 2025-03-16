@@ -33,6 +33,7 @@ import com.grupo.appandroid.database.repository.UserRepository
 import com.grupo.appandroid.model.User
 import com.grupo.appandroid.ui.theme.DarkBackground
 import com.grupo.appandroid.ui.theme.TextWhite
+import com.grupo.appandroid.viewmodels.LoginViewModel
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
@@ -165,6 +166,17 @@ fun FavoritesScreen(
                     )
                 }
             }
+            JobFavoritesCard(onCardClick = {}, onHeartClick = {})
+        }
+        // NavigationBar
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 16.dp) // Ajuste adicional para evitar colisões com a barra
+        ) {
+            NavigationBar(navController = navController)
         }
     }
 }

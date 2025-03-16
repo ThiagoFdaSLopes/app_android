@@ -39,7 +39,6 @@ import com.grupo.appandroid.viewmodels.RegistrationViewModel
 import com.grupo.appandroid.views.CandidatesScreen
 import com.grupo.appandroid.views.CandidatesViewModelFactory
 
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
@@ -49,11 +48,7 @@ class MainActivity : ComponentActivity() {
             delay(5000)
             keepSplashScreen = false
         }
-
-
         enableEdgeToEdge()
-
-
         super.onCreate(savedInstanceState)
         setContent {
             RegistrationAppTheme {
@@ -177,8 +172,8 @@ class MainActivity : ComponentActivity() {
                             name = name,
                             email = email,
                             phone = phone,
-                            password = "", // Not needed for display
-                            document = "", // Not needed for display
+                            password = "",
+                            document = "",
                             location = location,
                             skills = skills,
                             description = description,
@@ -190,10 +185,9 @@ class MainActivity : ComponentActivity() {
                         UserDetailScreen(
                             user = user,
                             navController = navController,
-                            viewModel = candidatesViewModel // Passe o viewModel
+                            viewModel = candidatesViewModel
                         )
                     }
-                    // Fix candidate details route
                     composable(
                         "jobDetail/{jobId}/{title}/{company}/{location}/{modality}/{description}",
                         arguments = listOf(
@@ -205,35 +199,22 @@ class MainActivity : ComponentActivity() {
                             navArgument("description") { type = NavType.StringType }
                         )
                     ) { backStackEntry ->
-                        val name =
-                            URLDecoder.decode(backStackEntry.arguments?.getString("name") ?: "")
-                        val age = URLDecoder.decode(
-                            (backStackEntry.arguments?.getString("age")?.toIntOrNull()
-                                ?: 0).toString()
-                        )
-                        val location =
-                            URLDecoder.decode(backStackEntry.arguments?.getString("location") ?: "")
-                        val role =
-                            URLDecoder.decode(backStackEntry.arguments?.getString("role") ?: "")
-                        val experience = URLDecoder.decode(
-                            backStackEntry.arguments?.getString("experience") ?: ""
-                        )
+                        val jobId = URLDecoder.decode(backStackEntry.arguments?.getString("jobId") ?: "", StandardCharsets.UTF_8.toString())
+                        val title = URLDecoder.decode(backStackEntry.arguments?.getString("title") ?: "", StandardCharsets.UTF_8.toString())
+                        val company = URLDecoder.decode(backStackEntry.arguments?.getString("company") ?: "", StandardCharsets.UTF_8.toString())
+                        val location = URLDecoder.decode(backStackEntry.arguments?.getString("location") ?: "", StandardCharsets.UTF_8.toString())
+                        val modality = URLDecoder.decode(backStackEntry.arguments?.getString("modality") ?: "", StandardCharsets.UTF_8.toString())
+                        val description = URLDecoder.decode(backStackEntry.arguments?.getString("description") ?: "", StandardCharsets.UTF_8.toString())
 
-                        // Create a User object with the required fields
-                        val user = User(
-                            userCode = 0L, // Default value
-                            name = name,
-                            email = "", // Not needed for display
-                            phone = "",
-                            password = "",
-                            document = "",
+                        JobDetailScreen(
+                            jobId = jobId,
+                            title = title,
+                            company = company,
                             location = location,
-                            skills = role,
-                            description = "Experience: $experience",
-                            academyLevel = null,
-                            academyCourse = null,
-                            academyInstitution = null,
-                            academyLastYear = ""
+                            modality = modality,
+                            description = description,
+                            navController = navController,
+                            viewModel = candidatesViewModel
                         )
                     }
                 }

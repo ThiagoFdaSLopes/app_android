@@ -5,7 +5,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.*
@@ -32,6 +34,7 @@ import com.grupo.appandroid.model.BrazilianStates
 import com.grupo.appandroid.ui.theme.DarkBackground
 import com.grupo.appandroid.viewmodels.CandidatesViewModel
 import com.grupo.appandroid.database.repository.UserRepository
+import com.grupo.appandroid.viewmodels.LoginViewModel
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
@@ -61,6 +64,8 @@ fun CandidatesScreen(
         viewModelStoreOwner = navController.getViewModelStoreOwner(navController.graph.id),
         factory = CandidatesViewModelFactory(database, isCompanyLogin)
     )
+
+    val loginViewModel = LoginViewModel()
 
     LaunchedEffect(Unit) {
         if (code != null) {
@@ -256,13 +261,24 @@ fun CandidatesScreen(
                 }
             }
 
-            NavigationBar(
-                onSettingsClick = { navController.navigate("SettingsScreen") },
-                onPeopleClick = { navController.navigate("PeopleScreen") },
-                onBriefcaseClick = { navController.navigate("BriefcaseScreen") },
-                onBellClick = { navController.navigate("NotificationsScreen") },
-                onStarClick = { navController.navigate("FavoritesScreen") }
-            )        }
+            NavigationBar(navController = navController)
+
+        }
+        IconButton(
+            onClick = {
+                navController.navigate("home")
+            },
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(14.dp)
+                .background(Color.Black.copy(alpha = 0.6f), CircleShape)
+        ) {
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = "Voltar",
+                tint = Color.White
+            )
+        }
     }
 }
 
