@@ -39,6 +39,7 @@ import com.grupo.appandroid.views.CandidatesScreen
 import com.grupo.appandroid.views.CandidatesViewModelFactory
 import com.grupo.appandroid.views.JobDetailScreen
 import com.grupo.appandroid.utils.SessionManager
+import com.grupo.appandroid.views.VagasScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,7 +66,7 @@ class MainActivity : ComponentActivity() {
                 val database = AppDatabase.getDatabase(this)
 
                 val candidatesViewModel: CandidatesViewModel = viewModel(
-                    factory = CandidatesViewModelFactory(database, isCompanyLogin)
+                    factory = CandidatesViewModelFactory(database)
                 )
 
                 // Se houver e-mail salvo, seta o código do usuário no CandidatesViewModel
@@ -74,7 +75,7 @@ class MainActivity : ComponentActivity() {
                         val userRepository = UserRepository(this@MainActivity)
                         val user = userRepository.findUserByEmail(email)
                         user?.userCode?.let { code ->
-                            candidatesViewModel.setUserCode(code.toString())
+                            candidatesViewModel.setCompanyCode(code.toString())
                         }
                     }
                 }
@@ -115,11 +116,18 @@ class MainActivity : ComponentActivity() {
                         HomeScreen(navController, loginViewModel = LoginViewModel())
                     }
                     composable(
+                        route = "CandidatesScreen",
+                        enterTransition = { fadeIn(animationSpec = tween(500)) },
+                        exitTransition = { fadeOut(animationSpec = tween(500)) }
+                    ) {
+                        CandidatesScreen(navController)
+                    }
+                    composable(
                         route = "VagasScreen",
                         enterTransition = { fadeIn(animationSpec = tween(500)) },
                         exitTransition = { fadeOut(animationSpec = tween(500)) }
                     ) {
-                        CandidatesScreen(navController, candidatesViewModel)
+                        VagasScreen(navController)
                     }
                     composable(
                         route = "PersonalProfileScreen",
@@ -127,7 +135,6 @@ class MainActivity : ComponentActivity() {
                         exitTransition = { fadeOut(animationSpec = tween(500)) }
                     ) {
                         val context = LocalContext.current
-                        val sessionManager = SessionManager(context)
                         val email = sessionManager.getLoggedInEmail()
                         val userRepository = UserRepository(context)
                         val user = userRepository.findUserByEmail(email.toString())
@@ -139,7 +146,6 @@ class MainActivity : ComponentActivity() {
                         exitTransition = { fadeOut(animationSpec = tween(500)) }
                     ) {
                         val context = LocalContext.current
-                        val sessionManager = SessionManager(context)
                         val email = sessionManager.getLoggedInEmail()
                         val companyRepository = CompanyRepository(context)
                         val company = companyRepository.findByEmail(email.toString())
