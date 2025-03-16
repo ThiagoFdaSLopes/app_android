@@ -28,7 +28,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.grupo.appandroid.R
 import com.grupo.appandroid.componentes.NavigationBar
+import com.grupo.appandroid.database.dao.AppDatabase
 import com.grupo.appandroid.database.repository.UserRepository
+import com.grupo.appandroid.factory.CandidatesViewModelFactory
 import com.grupo.appandroid.model.User
 import com.grupo.appandroid.utils.SessionManager
 import com.grupo.appandroid.viewmodels.CandidatesViewModel
@@ -39,14 +41,16 @@ fun UserDetailScreen(
     viewModel: CandidatesViewModel,
     navController: NavController
 ) {
+
     val context = LocalContext.current
+    // Retrieve the database instance (ensure this is how your AppDatabase is obtained)
+    val database = AppDatabase.getDatabase(context)
+    // Create your custom factory
+    val factory = CandidatesViewModelFactory(database)
+    // Obtain the CandidatesViewModel using the factory
+    val candidatesViewModel: CandidatesViewModel = viewModel(factory = factory)
     // Utilize o SessionManager para obter os dados de sessão
     val sessionManager = SessionManager(context)
-
-    // Se necessário, recupere novamente o CandidatesViewModel (atenção para não sobrescrever o parâmetro, se for o caso)
-    val candidatesViewModel: CandidatesViewModel = viewModel(
-        viewModelStoreOwner = navController.getViewModelStoreOwner(navController.graph.id)
-    )
 
     val isFavorite by remember(candidatesViewModel.favoriteCandidates) {
         derivedStateOf { candidatesViewModel.favoriteCandidates.contains(user.userCode.toString()) }
@@ -331,3 +335,4 @@ private fun InfoItem(icon: String, label: String, value: String) {
         )
     }
 }
+
