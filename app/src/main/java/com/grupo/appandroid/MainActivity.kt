@@ -1,7 +1,6 @@
 package com.grupo.appandroid
 
 import FavoritesScreen
-import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -34,10 +33,10 @@ import java.nio.charset.StandardCharsets
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.grupo.appandroid.database.repository.CompanyRepository
 import com.grupo.appandroid.database.repository.UserRepository
+import com.grupo.appandroid.factory.CandidatesViewModelFactory
 import com.grupo.appandroid.viewmodels.LoginViewModel
 import com.grupo.appandroid.viewmodels.RegistrationViewModel
 import com.grupo.appandroid.views.CandidatesScreen
-import com.grupo.appandroid.views.CandidatesViewModelFactory
 import com.grupo.appandroid.views.JobDetailScreen
 import com.grupo.appandroid.utils.SessionManager
 import com.grupo.appandroid.views.VagasScreen
