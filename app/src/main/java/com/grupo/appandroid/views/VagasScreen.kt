@@ -27,6 +27,7 @@ import com.grupo.appandroid.components.JobCard
 import com.grupo.appandroid.components.LoadingIndicator
 import com.grupo.appandroid.components.TopHeader
 import com.grupo.appandroid.database.dao.AppDatabase
+import com.grupo.appandroid.database.repository.UserRepository
 import com.grupo.appandroid.model.BrazilianStates
 import com.grupo.appandroid.ui.theme.DarkBackground
 import com.grupo.appandroid.utils.SessionManager
@@ -44,6 +45,10 @@ fun VagasScreen(
     val sessionManager = SessionManager(context)
     val email = sessionManager.getLoggedInEmail()
     val isCompanyLogin = sessionManager.isCompanyLogin()
+    val userRepository = UserRepository(context)
+    val user = userRepository.findUserByEmail(email!!)
+    val userCode = user?.userCode
+
 
     if (email == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -64,7 +69,7 @@ fun VagasScreen(
     // Instancia o VagasScreenViewModel por meio do Factory
     val viewModel: VagasScreenViewModel = viewModel(
         viewModelStoreOwner = navController.getViewModelStoreOwner(navController.graph.id),
-        factory = VagasScreenViewModelFactory(database)
+        factory = VagasScreenViewModelFactory(database, userCode = userCode.toString())
     )
 
     // Filtra as vagas com base na busca e na localização selecionada
@@ -224,12 +229,13 @@ fun VagasScreen(
 }
 
 class VagasScreenViewModelFactory(
-    private val database: AppDatabase
+    private val database: AppDatabase,
+    private val userCode: String // Adiciona o userCode como parâmetro
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(VagasScreenViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return VagasScreenViewModel(database) as T
+            return VagasScreenViewModel(database, userCode) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

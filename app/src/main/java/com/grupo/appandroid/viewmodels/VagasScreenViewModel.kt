@@ -15,7 +15,8 @@ import kotlinx.coroutines.launch
 import com.grupo.appandroid.service.RetrofitClient
 
 class VagasScreenViewModel(
-    private val database: AppDatabase
+    private val database: AppDatabase,
+    private val userCode: String // userCode passado pelo construtor
 ) : ViewModel() {
 
     var jobs by mutableStateOf<List<Job>>(emptyList())
@@ -35,7 +36,6 @@ class VagasScreenViewModel(
     var selectedCategory by mutableStateOf("")
     var resultsPerPage by mutableStateOf(20)
     var selectedArea by mutableStateOf("")
-    private var userCode = ""
 
     var favorites by mutableStateOf<Set<String>>(emptySet())
         private set
@@ -43,20 +43,25 @@ class VagasScreenViewModel(
     private val favoriteDao = database.favoriteDao()
 
     init {
+        if (userCode.isNotEmpty()) {
+            loadFavorites()
+            Log.d("JobsViewModel", "UserCode initialized to: $userCode")
+        } else {
+            Log.e("JobsViewModel", "UserCode is empty!")
+        }
         loadCategories()
         fetchJobs(1)
     }
 
-    fun setUserCode(code: String) {
-        userCode = code
-        loadFavorites()
-    }
-
     private fun loadFavorites() {
         viewModelScope.launch {
-            favoriteDao.getFavoritesByUser(userCode).collectLatest { favoritesList ->
-                favorites = favoritesList.map { it.jobId }.toSet()
-                Log.d("JobsViewModel", "Favorites loaded: $favorites")
+            if (userCode.isNotEmpty()) {
+                favoriteDao.getFavoritesByUser(userCode).collectLatest { favoritesList ->
+                    favorites = favoritesList.map { it.jobId }.toSet()
+                    Log.d("JobsViewModel", "Favorites loaded for user $userCode: $favorites")
+                }
+            } else {
+                Log.e("JobsViewModel", "Cannot load favorites: userCode is empty")
             }
         }
     }
@@ -64,16 +69,27 @@ class VagasScreenViewModel(
     fun toggleFavoriteJob(jobId: String) {
         viewModelScope.launch {
             try {
+                if (userCode.isEmpty()) {
+                    error = "Cannot favorite job: userCode is not set"
+                    Log.e("JobsViewModel", "toggleFavoriteJob failed: userCode is empty")
+                    return@launch
+                }
+
                 val isCurrentlyFavorite = favorites.contains(jobId)
+                Log.d("JobsViewModel", "Toggling favorite: jobId=$jobId, userCode=$userCode, isFavorite=$isCurrentlyFavorite")
+
                 if (isCurrentlyFavorite) {
                     favoriteDao.delete(FavoriteJob(userCode, jobId))
                     favorites = favorites - jobId
+                    Log.d("JobsViewModel", "Removed favorite: jobId=$jobId")
                 } else {
                     favoriteDao.insert(FavoriteJob(userCode, jobId))
                     favorites = favorites + jobId
+                    Log.d("JobsViewModel", "Added favorite: jobId=$jobId")
                 }
             } catch (e: Exception) {
                 error = "Error toggling favorite job: ${e.message}"
+                Log.e("JobsViewModel", "Error in toggleFavoriteJob: ${e.message}")
             }
         }
     }
