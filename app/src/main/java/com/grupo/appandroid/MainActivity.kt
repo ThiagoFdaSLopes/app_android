@@ -107,14 +107,14 @@ class MainActivity : ComponentActivity() {
                         enterTransition = { fadeIn(animationSpec = tween(500)) },
                         exitTransition = { fadeOut(animationSpec = tween(500)) }
                     ) {
-                        FavoritesScreen(navController, isCompany = isCompanyLogin)
+                        FavoritesScreen(navController)
                     }
                     composable(
                         route = "home",
                         enterTransition = { fadeIn(animationSpec = tween(500)) },
                         exitTransition = { fadeOut(animationSpec = tween(500)) }
                     ) {
-                        HomeScreen(navController, loginViewModel = LoginViewModel(), isCompanyLogin = isCompanyLogin)
+                        HomeScreen(navController, loginViewModel = LoginViewModel())
                     }
                     composable(
                         route = "CandidatesScreen",
