@@ -53,6 +53,7 @@ fun HomeScreen(
         return
     }
 
+
     // Use o método do SessionManager para determinar o tipo de login
     val isCompanyLogin = sessionManager.isCompanyLogin()
     val userRepository = UserRepository(context)

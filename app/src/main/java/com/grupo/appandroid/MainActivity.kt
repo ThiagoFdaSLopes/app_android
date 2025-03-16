@@ -1,6 +1,7 @@
 package com.grupo.appandroid
 
 import FavoritesScreen
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -106,14 +107,14 @@ class MainActivity : ComponentActivity() {
                         enterTransition = { fadeIn(animationSpec = tween(500)) },
                         exitTransition = { fadeOut(animationSpec = tween(500)) }
                     ) {
-                        FavoritesScreen(navController)
+                        FavoritesScreen(navController, isCompany = isCompanyLogin)
                     }
                     composable(
                         route = "home",
                         enterTransition = { fadeIn(animationSpec = tween(500)) },
                         exitTransition = { fadeOut(animationSpec = tween(500)) }
                     ) {
-                        HomeScreen(navController, loginViewModel = LoginViewModel())
+                        HomeScreen(navController, loginViewModel = LoginViewModel(), isCompanyLogin = isCompanyLogin)
                     }
                     composable(
                         route = "CandidatesScreen",

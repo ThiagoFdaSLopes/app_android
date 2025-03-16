@@ -1,3 +1,4 @@
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -33,6 +34,7 @@ import com.grupo.appandroid.model.User
 import com.grupo.appandroid.ui.theme.DarkBackground
 import com.grupo.appandroid.ui.theme.TextWhite
 import com.grupo.appandroid.utils.SessionManager
+import com.grupo.appandroid.viewmodels.LoginViewModel
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
@@ -74,7 +76,6 @@ fun FavoritesScreen(
             code = code.toString()
         )
     }
-
     val favoriteJobsDetails by viewModel.favoriteJobDetails.collectAsState()
     val favoriteCandidatesDetails by viewModel.favoriteCandidateDetails.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -236,6 +237,7 @@ fun FavoritesList(
     }
 }
 
+// Função auxiliar já existente no seu código
 fun estimateAge(academyLastYear: String?): Int {
     return academyLastYear?.toIntOrNull()?.let { lastYear ->
         val currentYear = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)

@@ -80,8 +80,6 @@ fun CandidatesScreen(
             Log.d("VagasScreen", "userCode is null for email: $email")
         }
     }
-
-    // Filtra os candidatos
     val filteredUsers by remember(
         viewModel.searchQuery,
         viewModel.selectedLocation,
