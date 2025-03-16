@@ -29,6 +29,7 @@ import com.grupo.appandroid.components.LoadingIndicator
 import com.grupo.appandroid.components.TopHeader
 import com.grupo.appandroid.database.dao.AppDatabase
 import com.grupo.appandroid.database.repository.CompanyRepository
+import com.grupo.appandroid.factory.CandidatesViewModelFactory
 import com.grupo.appandroid.model.BrazilianStates
 import com.grupo.appandroid.ui.theme.DarkBackground
 import com.grupo.appandroid.utils.SessionManager
@@ -241,18 +242,6 @@ fun CandidatesScreen(
                 tint = Color.White
             )
         }
-    }
-}
-
-class CandidatesViewModelFactory(
-    private val database: AppDatabase,
-) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(CandidatesViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return CandidatesViewModel(database) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
 
