@@ -16,8 +16,9 @@ import com.grupo.appandroid.service.RetrofitClient
 
 class VagasScreenViewModel(
     private val database: AppDatabase,
-    private val userCode: String // userCode passado pelo construtor
+    private val userCode: String
 ) : ViewModel() {
+    private val favoriteJobDao = database.favoriteJobDao()
 
     var jobs by mutableStateOf<List<Job>>(emptyList())
         private set
@@ -40,7 +41,7 @@ class VagasScreenViewModel(
     var favorites by mutableStateOf<Set<String>>(emptySet())
         private set
 
-    private val favoriteDao = database.favoriteDao()
+    private val favoriteDao = database.favoriteJobDao()
 
     init {
         if (userCode.isNotEmpty()) {
@@ -65,34 +66,37 @@ class VagasScreenViewModel(
             }
         }
     }
-
     fun toggleFavoriteJob(jobId: String) {
         viewModelScope.launch {
-            try {
-                if (userCode.isEmpty()) {
-                    error = "Cannot favorite job: userCode is not set"
-                    Log.e("JobsViewModel", "toggleFavoriteJob failed: userCode is empty")
-                    return@launch
-                }
-
-                val isCurrentlyFavorite = favorites.contains(jobId)
-                Log.d("JobsViewModel", "Toggling favorite: jobId=$jobId, userCode=$userCode, isFavorite=$isCurrentlyFavorite")
-
-                if (isCurrentlyFavorite) {
-                    favoriteDao.delete(FavoriteJob(userCode, jobId))
-                    favorites = favorites - jobId
-                    Log.d("JobsViewModel", "Removed favorite: jobId=$jobId")
-                } else {
-                    favoriteDao.insert(FavoriteJob(userCode, jobId))
-                    favorites = favorites + jobId
-                    Log.d("JobsViewModel", "Added favorite: jobId=$jobId")
-                }
-            } catch (e: Exception) {
-                error = "Error toggling favorite job: ${e.message}"
-                Log.e("JobsViewModel", "Error in toggleFavoriteJob: ${e.message}")
+            val job = jobs.find { it.id == jobId } ?: return@launch
+            val currentFavorites = favorites
+            if (jobId in currentFavorites) {
+                favoriteJobDao.delete(FavoriteJob(
+                    userCode = userCode,
+                    jobId = job.id,
+                    title = job.title,
+                    description = job.description,
+                    companyName = job.company.display_name,
+                    locationName = job.location.display_name,
+                    contractTime = job.contract_time
+                ))
+                favorites = currentFavorites.filter { it != jobId }.toSet()
+            } else {
+                val favoriteJob = FavoriteJob(
+                    userCode = userCode,
+                    jobId = job.id,
+                    title = job.title,
+                    description = job.description,
+                    companyName = job.company.display_name,
+                    locationName = job.location.display_name,
+                    contractTime = job.contract_time
+                )
+                favoriteJobDao.insert(favoriteJob)
+                favorites = currentFavorites + jobId
             }
         }
     }
+
 
     fun updateSearchQuery(query: String) {
         searchQuery = query

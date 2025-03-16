@@ -48,6 +48,11 @@ fun VagasScreen(
     val userRepository = UserRepository(context)
     val user = userRepository.findUserByEmail(email!!)
     val userCode = user?.userCode
+    println("CODIGO DO USUARIO")
+    println(userCode)
+    println(email)
+    println(isCompanyLogin)
+    println(user)
 
 
     if (email == null) {

@@ -24,8 +24,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.grupo.appandroid.componentes.NavigationBar
-import com.grupo.appandroid.components.CandidateCard
 import com.grupo.appandroid.components.JobCard
+import com.grupo.appandroid.components.CandidateCard
 import com.grupo.appandroid.components.LoadingIndicator
 import com.grupo.appandroid.database.dao.AppDatabase
 import com.grupo.appandroid.database.repository.CompanyRepository
@@ -34,7 +34,6 @@ import com.grupo.appandroid.model.User
 import com.grupo.appandroid.ui.theme.DarkBackground
 import com.grupo.appandroid.ui.theme.TextWhite
 import com.grupo.appandroid.utils.SessionManager
-import com.grupo.appandroid.viewmodels.LoginViewModel
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
@@ -43,10 +42,8 @@ fun FavoritesScreen(
     navController: NavController,
 ) {
     val context = LocalContext.current
-    // Utilizando o SessionManager para recuperar o e-mail da sessão
     val sessionManager = SessionManager(context)
     val email = sessionManager.getLoggedInEmail()
-
     if (email.isNullOrEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(text = "Email não encontrado. Faça login.", color = TextWhite)
@@ -65,7 +62,7 @@ fun FavoritesScreen(
 
     val database = AppDatabase.getDatabase(context)
     val favoriteCandidateDao = database.favoriteCandidateDao()
-    val favoriteJobDao = database.favoriteDao()
+    val favoriteJobDao = database.favoriteJobDao()
 
     val factory = FavoritesScreenViewModelFactory(favoriteCandidateDao, favoriteJobDao, database)
     val viewModel: FavoritesScreenViewModel = viewModel(factory = factory)
@@ -76,6 +73,7 @@ fun FavoritesScreen(
             code = code.toString()
         )
     }
+
     val favoriteJobsDetails by viewModel.favoriteJobDetails.collectAsState()
     val favoriteCandidatesDetails by viewModel.favoriteCandidateDetails.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -167,15 +165,6 @@ fun FavoritesScreen(
                 }
             }
         }
-        // NavigationBar
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 16.dp) // Ajuste adicional para evitar colisões com a barra
-        ) {
-            NavigationBar(navController = navController)
-        }
     }
 }
 
@@ -237,7 +226,6 @@ fun FavoritesList(
     }
 }
 
-// Função auxiliar já existente no seu código
 fun estimateAge(academyLastYear: String?): Int {
     return academyLastYear?.toIntOrNull()?.let { lastYear ->
         val currentYear = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)
