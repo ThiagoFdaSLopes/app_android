@@ -62,6 +62,7 @@ class CandidatesViewModel(
 
     fun setUserCode(code: String) {
         userCode = code
+        println("CandidatesViewModel - userCode set to: $userCode")
         if (isCompanyLogin) {
             loadFavoriteCandidates()
         } else {
@@ -118,12 +119,14 @@ class CandidatesViewModel(
     private fun toggleFavoriteCandidate(userCode: String) {
         viewModelScope.launch {
             try {
-                val isFavorite = favoriteCandidateDao.isFavorite(this@CandidatesViewModel.userCode, userCode)
+                val companyCode = this@CandidatesViewModel.userCode
+                println("toggleFavoriteCandidate - companyCode: $companyCode, userCode: $userCode")
+                val isFavorite = favoriteCandidateDao.isFavorite(companyCode, userCode)
                 if (isFavorite) {
-                    favoriteCandidateDao.delete(FavoriteCandidate(this@CandidatesViewModel.userCode, userCode))
+                    favoriteCandidateDao.delete(FavoriteCandidate(companyCode, userCode))
                     favoriteCandidates = favoriteCandidates - userCode
                 } else {
-                    favoriteCandidateDao.insert(FavoriteCandidate(this@CandidatesViewModel.userCode, userCode))
+                    favoriteCandidateDao.insert(FavoriteCandidate(companyCode, userCode))
                     favoriteCandidates = favoriteCandidates + userCode
                 }
                 println("toggleFavoriteCandidate - Toggled $userCode, new favorites: $favoriteCandidates")
