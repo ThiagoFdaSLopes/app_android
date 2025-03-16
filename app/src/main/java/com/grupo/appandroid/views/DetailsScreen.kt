@@ -58,7 +58,7 @@ fun UserDetailScreen(
             UserRepository(context).findUserByEmail(email)?.userCode
         }
         if (userCode != null) {
-            candidatesViewModel.setUserCode(userCode.toString())
+            candidatesViewModel.setCompanyCode(userCode.toString())
             println("UserDetailScreen - Initial favoriteCandidates: ${candidatesViewModel.favoriteCandidates}")
         }
     }
@@ -86,7 +86,7 @@ fun UserDetailScreen(
             }
 
             IconButton(
-                onClick = { candidatesViewModel.toggleFavorite(user.userCode.toString()) },
+                onClick = { candidatesViewModel.toggleFavoriteCandidate(user.userCode.toString()) },
                 modifier = Modifier.size(48.dp)
             ) {
                 val animatedSize by animateDpAsState(
@@ -185,7 +185,7 @@ fun UserDetailScreen(
             Spacer(modifier = Modifier.weight(1f))
 
             Button(
-                onClick = { candidatesViewModel.toggleFavorite(user.userCode.toString()) },
+                onClick = { candidatesViewModel.toggleFavoriteCandidate(user.userCode.toString()) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 16.dp),
