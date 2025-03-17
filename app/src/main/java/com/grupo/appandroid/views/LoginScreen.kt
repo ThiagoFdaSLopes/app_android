@@ -119,16 +119,6 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
                 )
             }
 
-            Text(
-                text = stringResource(id = R.string.forget_password),
-                color = TextGray,
-                fontSize = 14.sp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                textAlign = TextAlign.Start
-            )
-
             Button(
                 onClick = { loginViewModel.login(userRepository, companyRepository) },
                 enabled = !isLoading.value,

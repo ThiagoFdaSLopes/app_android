@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -72,7 +73,7 @@ fun UserDetailScreen(
             IconButton(onClick = { navController.popBackStack() }) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Voltar",
+                    contentDescription = stringResource(id = R.string.back),
                     tint = Color.White
                 )
             }
@@ -133,20 +134,20 @@ fun UserDetailScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            InfoItem(icon = "📱", label = "Telefone:", value = user.phone)
-            InfoItem(icon = "📍", label = "Localização:", value = user.location)
-            InfoItem(icon = "🎓", label = "Formação:", value = "${user.academyLevel ?: "Não informado"}")
+            InfoItem(icon = "📱", label = stringResource(id = R.string.phone), value = user.phone)
+            InfoItem(icon = "📍", label = stringResource(id = R.string.location), value = user.location)
+            InfoItem(icon = "🎓", label = stringResource(id = R.string.academy_course), value = user.academyLevel ?: "Não informado")
             user.academyInstitution?.let { institution ->
-                InfoItem(icon = "🏛️", label = "Instituição:", value = institution)
+                InfoItem(icon = "🏛️", label = stringResource(id = R.string.academy_institution), value = institution)
             }
             user.academyLastYear?.let { year ->
-                InfoItem(icon = "📅", label = "Ano de Conclusão:", value = year)
+                InfoItem(icon = "📅", label = stringResource(id = R.string.academy_year_complete), value = year)
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "Habilidades:",
+                text = stringResource(id = R.string.skills),
                 color = Color.White,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
@@ -161,7 +162,7 @@ fun UserDetailScreen(
             user.description?.let { description ->
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Sobre:",
+                    text = stringResource(id = R.string.description),
                     color = Color.White,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
@@ -187,7 +188,7 @@ fun UserDetailScreen(
                 )
             ) {
                 Text(
-                    text = if (isFavorite) "Remover dos Favoritos" else "Favoritar Candidato",
+                    text = if (isFavorite) stringResource(id = R.string.remove_favorite) else stringResource(id = R.string.add_favorite),
                     fontSize = 16.sp
                 )
             }
@@ -232,7 +233,7 @@ fun JobDetailScreen(
             IconButton(onClick = { navController.popBackStack() }) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Voltar",
+                    contentDescription = stringResource(id = R.string.back),
                     tint = Color.White
                 )
             }
@@ -263,13 +264,13 @@ fun JobDetailScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            InfoItem(icon = "📍", label = "Localização:", value = location)
-            InfoItem(icon = "💼", label = "Modalidade:", value = modality)
+            InfoItem(icon = "📍", label = stringResource(id = R.string.location), value = location)
+            InfoItem(icon = "💼", label = stringResource(id = R.string.modality), value = modality)
 
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "Descrição da vaga:",
+                text = stringResource(id = R.string.description),
                 color = Color.White,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
@@ -290,7 +291,7 @@ fun JobDetailScreen(
                     .padding(vertical = 8.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.White)
             ) {
-                Text("CANDIDATAR-SE", color = Color.Black)
+                Text(stringResource(id = R.string.sent_candidature), color = Color.Black)
             }
         }
 
