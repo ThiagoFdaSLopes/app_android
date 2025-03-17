@@ -33,32 +33,33 @@ import com.grupo.appandroid.database.repository.CompanyRepository
 import com.grupo.appandroid.database.repository.UserRepository
 import com.grupo.appandroid.ui.theme.DarkBackground
 import com.grupo.appandroid.ui.theme.TextWhite
+import com.grupo.appandroid.utils.SessionManager
 import com.grupo.appandroid.viewmodels.LoginViewModel
 
 @Composable
 fun HomeScreen(
     navController: NavController,
-    loginViewModel: LoginViewModel,
-    isCompanyLogin: Boolean
+    loginViewModel: LoginViewModel
 ) {
     val context = LocalContext.current
-    val prefs = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
-    val email = prefs.getString("loggedInEmail", null)
+    val sessionManager = SessionManager(context)
+    val email = sessionManager.getLoggedInEmail()
 
-    // Verifica se o email foi recuperado; caso contrário, exibe uma mensagem ou redireciona para o login
     if (email.isNullOrEmpty()) {
+        // Redireciona para login ou exibe mensagem
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(text = "Email não encontrado. Faça login.", color = TextWhite)
         }
         return
     }
 
+
+    // Use o método do SessionManager para determinar o tipo de login
+    val isCompanyLogin = sessionManager.isCompanyLogin()
     val userRepository = UserRepository(context)
     val companyRepository = CompanyRepository(context)
-    // Define se o login é de usuário (quando não for login de empresa)
-    val isUser = !isCompanyLogin
-    // Recupera o nome com um fallback, evitando o uso do operador !!
-    val name = if (isUser) {
+
+    val name = if (!isCompanyLogin) {
         userRepository.findUserByEmail(email)?.name ?: "Usuário"
     } else {
         companyRepository.findByEmail(email)?.companyName ?: "Empresa"
@@ -103,18 +104,18 @@ fun HomeScreen(
                     MenuIcon(
                         icon = R.drawable.icon_suitcases,
                         label = ""
-                    ) { navController.navigate("VagasScreen") }
+                    ) { navController.navigate(if(!isCompanyLogin) "VagasScreen" else "CandidatesScreen") }
                     MenuIcon(
                         icon = R.drawable.heart,
                         label = ""
-                    ) { navController.navigate("FavoritesScreen") }
+                    ) { navController.navigate("FavoritesScreen")}
                     MenuIcon(
                         icon = R.drawable.icon_people,
                         label = ""
                     ) {
                         // Se for usuário, navega para PersonalProfileScreen; senão, para CompanyProfileScreen
                         navController.navigate(
-                            if (isUser) "PersonalProfileScreen" else "CompanyProfileScreen"
+                            if (!isCompanyLogin) "PersonalProfileScreen" else "CompanyProfileScreen"
                         )
                     }
                 }

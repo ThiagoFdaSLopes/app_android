@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import com.grupo.appandroid.database.repository.CompanyRepository
 import com.grupo.appandroid.database.repository.UserRepository
 import com.grupo.appandroid.model.User
+import com.grupo.appandroid.utils.SessionManager
 
 class LoginViewModel : ViewModel() {
         private val _email = MutableLiveData<String>()
@@ -25,10 +26,8 @@ class LoginViewModel : ViewModel() {
         val loginSuccess: MutableLiveData<LoginResult?> = _loginSuccess
 
         fun logout(context: Context) {
-                val prefs = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
-                prefs.edit()
-                        .clear()
-                        .apply()
+                val sessionManager = SessionManager(context)
+                sessionManager.clearSession()
 
                 _email.value = ""
                 _password.value = ""

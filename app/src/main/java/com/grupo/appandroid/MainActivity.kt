@@ -1,7 +1,6 @@
 package com.grupo.appandroid
 
 import FavoritesScreen
-import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -9,8 +8,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavType
@@ -34,13 +33,17 @@ import java.nio.charset.StandardCharsets
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.grupo.appandroid.database.repository.CompanyRepository
 import com.grupo.appandroid.database.repository.UserRepository
+import com.grupo.appandroid.factory.CandidatesViewModelFactory
 import com.grupo.appandroid.viewmodels.LoginViewModel
 import com.grupo.appandroid.viewmodels.RegistrationViewModel
 import com.grupo.appandroid.views.CandidatesScreen
-import com.grupo.appandroid.views.CandidatesViewModelFactory
+import com.grupo.appandroid.views.JobDetailScreen
+import com.grupo.appandroid.utils.SessionManager
+import com.grupo.appandroid.views.VagasScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Instala a splash screen e mantém-a por 5 segundos
         val splashScreen = installSplashScreen()
         var keepSplashScreen = true
         splashScreen.setKeepOnScreenCondition { keepSplashScreen }
@@ -52,25 +55,41 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             RegistrationAppTheme {
+                // Cria o SessionManager e recupera os dados de sessão
+                val sessionManager = SessionManager(this)
+                val savedEmail = sessionManager.getLoggedInEmail()
+                val isCompanyLogin = sessionManager.isCompanyLogin()
+
+                // Define a tela inicial conforme a existência do e-mail salvo
+                val startDestination = if (savedEmail != null) "home" else "login"
                 val navController = rememberNavController()
                 val database = AppDatabase.getDatabase(this)
-                val prefs = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
-                val isCompanyLogin = prefs.getString("loginType", null) == "company"
 
                 val candidatesViewModel: CandidatesViewModel = viewModel(
-                    factory = CandidatesViewModelFactory(database, isCompanyLogin)
+                    factory = CandidatesViewModelFactory(database)
                 )
 
-                LaunchedEffect(Unit) {
-                    val email = prefs.getString("loggedInEmail", null)
-                    val userRepository = UserRepository(this@MainActivity)
-                    val user = userRepository.findUserByEmail(email ?: "")
-                    user?.userCode?.let { candidatesViewModel.setUserCode(it.toString()) }
+                LaunchedEffect(savedEmail) {
+                    savedEmail?.let { email ->
+                        if (sessionManager.isCompanyLogin()) {
+                            val companyRepository = CompanyRepository(this@MainActivity)
+                            val company = companyRepository.findByEmail(email)
+                            company?.companyCode?.let { code ->
+                                candidatesViewModel.setCompanyCode(code.toString())
+                            }
+                        } else {
+                            val userRepository = UserRepository(this@MainActivity)
+                            val user = userRepository.findUserByEmail(email)
+                            user?.userCode?.let { code ->
+                                candidatesViewModel.setCompanyCode(code.toString())
+                            }
+                        }
+                    }
                 }
 
                 NavHost(
                     navController = navController,
-                    startDestination = "login"
+                    startDestination = startDestination
                 ) {
                     composable(
                         route = "login",
@@ -94,21 +113,28 @@ class MainActivity : ComponentActivity() {
                         enterTransition = { fadeIn(animationSpec = tween(500)) },
                         exitTransition = { fadeOut(animationSpec = tween(500)) }
                     ) {
-                        FavoritesScreen(navController, isCompany = isCompanyLogin)
+                        FavoritesScreen(navController)
                     }
                     composable(
                         route = "home",
                         enterTransition = { fadeIn(animationSpec = tween(500)) },
                         exitTransition = { fadeOut(animationSpec = tween(500)) }
                     ) {
-                        HomeScreen(navController, loginViewModel = LoginViewModel(), isCompanyLogin = isCompanyLogin)
+                        HomeScreen(navController, loginViewModel = LoginViewModel())
+                    }
+                    composable(
+                        route = "CandidatesScreen",
+                        enterTransition = { fadeIn(animationSpec = tween(500)) },
+                        exitTransition = { fadeOut(animationSpec = tween(500)) }
+                    ) {
+                        CandidatesScreen(navController)
                     }
                     composable(
                         route = "VagasScreen",
                         enterTransition = { fadeIn(animationSpec = tween(500)) },
                         exitTransition = { fadeOut(animationSpec = tween(500)) }
                     ) {
-                        CandidatesScreen(navController, candidatesViewModel)
+                        VagasScreen(navController)
                     }
                     composable(
                         route = "PersonalProfileScreen",
@@ -116,11 +142,9 @@ class MainActivity : ComponentActivity() {
                         exitTransition = { fadeOut(animationSpec = tween(500)) }
                     ) {
                         val context = LocalContext.current
-                        val prefs = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
-                        val email = prefs.getString("loggedInEmail", null)
+                        val email = sessionManager.getLoggedInEmail()
                         val userRepository = UserRepository(context)
-
-                        val user = userRepository.findUserByEmail(email = email.toString())
+                        val user = userRepository.findUserByEmail(email.toString())
                         PersonalProfileScreen(user = user!!, navController = navController)
                     }
                     composable(
@@ -129,11 +153,9 @@ class MainActivity : ComponentActivity() {
                         exitTransition = { fadeOut(animationSpec = tween(500)) }
                     ) {
                         val context = LocalContext.current
-                        val prefs = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
-                        val email = prefs.getString("loggedInEmail", null)
+                        val email = sessionManager.getLoggedInEmail()
                         val companyRepository = CompanyRepository(context)
-
-                        val company = companyRepository.findByEmail(email = email.toString())
+                        val company = companyRepository.findByEmail(email.toString())
                         PersonalProfileScreen(company = company!!, navController = navController)
                     }
                     composable(
@@ -165,7 +187,6 @@ class MainActivity : ComponentActivity() {
                             backStackEntry.arguments?.getString("description") ?: "",
                             StandardCharsets.UTF_8.toString()
                         )
-
 
                         val user = User(
                             userCode = userCode,
@@ -222,4 +243,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-

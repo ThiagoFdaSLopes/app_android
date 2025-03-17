@@ -11,13 +11,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@Database(entities = [User::class, Company::class, FavoriteJob::class, FavoriteCandidate::class], version = 4, exportSchema = false)
+@Database(entities = [User::class, Company::class, FavoriteJob::class, FavoriteCandidate::class], version = 5, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun userDao(): UserDAO
     abstract fun companyDao(): CompanyDAO
-    abstract fun favoriteDao(): FavoriteJobDao
     abstract fun favoriteCandidateDao(): FavoriteCandidateDao
+    abstract fun favoriteJobDao(): FavoriteJobDao
 
     companion object {
         @Volatile
@@ -67,21 +67,7 @@ abstract class AppDatabase : RoomDatabase() {
                 academyInstitution = "USP",
                 academyLastYear = "2018"
             ),
-            User(
-                userCode = 2L,
-                name = "Ana Clara",
-                phone = "21976543210",
-                email = "ana.clara@example.com",
-                password = "hashedPass456",
-                document = "987.654.321-00",
-                location = "Rio de Janeiro - RJ",
-                skills = "Designer UX/UI",
-                description = "3 anos",
-                academyLevel = "Graduação",
-                academyCourse = "Design Gráfico",
-                academyInstitution = "UFRJ",
-                academyLastYear = "2020"
-            ),
+
             User(
                 userCode = 3L,
                 name = "João Pedro",

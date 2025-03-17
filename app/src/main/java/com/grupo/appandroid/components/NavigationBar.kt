@@ -16,6 +16,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.grupo.appandroid.R
+import com.grupo.appandroid.utils.SessionManager
 import com.grupo.appandroid.viewmodels.LoginViewModel
 
 @Composable
@@ -24,6 +25,9 @@ fun NavigationBar(
 ) {
     val context = LocalContext.current
     val loginViewModel = LoginViewModel()
+    val sessionManager = SessionManager(context)
+    val isCompanyLogin = sessionManager.isCompanyLogin()
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -46,7 +50,12 @@ fun NavigationBar(
             modifier = Modifier
                 .weight(1f)
                 .size(24.dp)
-                .clickable {  navController.navigate("VagasScreen")}
+                .clickable { if(isCompanyLogin) {
+                        navController.navigate("CandidatesScreen")
+                    } else {
+                        navController.navigate("VagasScreen")
+                    }
+                }
         )
         Icon(
             painter = painterResource(id = R.drawable.home),

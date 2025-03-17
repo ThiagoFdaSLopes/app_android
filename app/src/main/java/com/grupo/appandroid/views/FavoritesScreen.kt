@@ -24,8 +24,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.grupo.appandroid.componentes.NavigationBar
-import com.grupo.appandroid.components.CandidateCard
 import com.grupo.appandroid.components.JobCard
+import com.grupo.appandroid.components.CandidateCard
 import com.grupo.appandroid.components.LoadingIndicator
 import com.grupo.appandroid.database.dao.AppDatabase
 import com.grupo.appandroid.database.repository.CompanyRepository
@@ -33,19 +33,17 @@ import com.grupo.appandroid.database.repository.UserRepository
 import com.grupo.appandroid.model.User
 import com.grupo.appandroid.ui.theme.DarkBackground
 import com.grupo.appandroid.ui.theme.TextWhite
-import com.grupo.appandroid.viewmodels.LoginViewModel
+import com.grupo.appandroid.utils.SessionManager
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
 @Composable
 fun FavoritesScreen(
     navController: NavController,
-    isCompany: Boolean
 ) {
     val context = LocalContext.current
-    val prefs = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
-    val email = prefs.getString("loggedInEmail", null)
-
+    val sessionManager = SessionManager(context)
+    val email = sessionManager.getLoggedInEmail()
     if (email.isNullOrEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text(text = "Email não encontrado. Faça login.", color = TextWhite)
@@ -55,23 +53,23 @@ fun FavoritesScreen(
 
     val userRepository = UserRepository(context)
     val companyRepository = CompanyRepository(context)
-    val isUser = !isCompany
-    val code = if (isUser) {
-        userRepository.findUserByEmail(email)?.userCode ?: 1
-    } else {
+    val isCompanyLogin = sessionManager.isCompanyLogin()
+    val code = if (isCompanyLogin) {
         companyRepository.findByEmail(email)?.companyCode ?: 1
+    } else {
+        userRepository.findUserByEmail(email)?.userCode ?: 1
     }
 
     val database = AppDatabase.getDatabase(context)
     val favoriteCandidateDao = database.favoriteCandidateDao()
-    val favoriteJobDao = database.favoriteDao()
+    val favoriteJobDao = database.favoriteJobDao()
 
     val factory = FavoritesScreenViewModelFactory(favoriteCandidateDao, favoriteJobDao, database)
     val viewModel: FavoritesScreenViewModel = viewModel(factory = factory)
 
-    LaunchedEffect(key1 = code, key2 = isCompany) {
+    LaunchedEffect(key1 = code, key2 = isCompanyLogin) {
         viewModel.loadFavorites(
-            userType = if (isCompany) UserType.COMPANY else UserType.USER,
+            userType = if (isCompanyLogin) UserType.COMPANY else UserType.USER,
             code = code.toString()
         )
     }
@@ -93,7 +91,7 @@ fun FavoritesScreen(
                 .padding(top = 36.dp),
             horizontalAlignment = Alignment.Start
         ) {
-            val titleText = if (isCompany) "Candidatos Favoritados" else "Vagas Favoritadas"
+            val titleText = if (isCompanyLogin) "Candidatos Favoritados" else "Vagas Favoritadas"
 
             Row(
                 modifier = Modifier
@@ -138,7 +136,7 @@ fun FavoritesScreen(
                         )
                     }
                 }
-                favoriteJobsDetails.isEmpty() && !isCompany -> {
+                favoriteJobsDetails.isEmpty() && !isCompanyLogin -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
                             text = "Nenhuma vaga favoritada",
@@ -147,7 +145,7 @@ fun FavoritesScreen(
                         )
                     }
                 }
-                favoriteCandidatesDetails.isEmpty() && isCompany -> {
+                favoriteCandidatesDetails.isEmpty() && isCompanyLogin -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
                             text = "Nenhum candidato favoritado",
@@ -158,7 +156,7 @@ fun FavoritesScreen(
                 }
                 else -> {
                     FavoritesList(
-                        isCompany = isCompany,
+                        isCompany = isCompanyLogin,
                         viewModel = viewModel,
                         favoriteJobsDetails = favoriteJobsDetails,
                         favoriteCandidatesDetails = favoriteCandidatesDetails,
@@ -166,17 +164,6 @@ fun FavoritesScreen(
                     )
                 }
             }
-            JobFavoritesCard(onCardClick = {}, onHeartClick = {})
-        }
-        // NavigationBar
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomCenter)
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 16.dp) // Ajuste adicional para evitar colisões com a barra
-        ) {
-            NavigationBar(navController = navController)
         }
     }
 }
@@ -239,7 +226,6 @@ fun FavoritesList(
     }
 }
 
-// Função auxiliar já existente no seu código
 fun estimateAge(academyLastYear: String?): Int {
     return academyLastYear?.toIntOrNull()?.let { lastYear ->
         val currentYear = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)

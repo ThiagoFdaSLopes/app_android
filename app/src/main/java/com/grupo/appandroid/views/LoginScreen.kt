@@ -1,6 +1,7 @@
 package com.grupo.appandroid.views
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,15 +24,32 @@ import com.grupo.appandroid.R
 import com.grupo.appandroid.components.CustomTextField
 import com.grupo.appandroid.database.repository.CompanyRepository
 import com.grupo.appandroid.database.repository.UserRepository
-import com.grupo.appandroid.ui.theme.*
+import com.grupo.appandroid.ui.theme.AmberPrimary
+import com.grupo.appandroid.ui.theme.DarkBackground
+import com.grupo.appandroid.ui.theme.TextGray
+import com.grupo.appandroid.ui.theme.TextWhite
+import com.grupo.appandroid.utils.SessionManager
 import com.grupo.appandroid.viewmodels.LoginViewModel
 
 @Composable
 fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
     val context = LocalContext.current
+    val sessionManager = SessionManager(context)
+
+    // Se já existir um e-mail salvo, redireciona para a tela "home"
+    val savedEmail = sessionManager.getLoggedInEmail()
+    if (savedEmail != null) {
+        LaunchedEffect(savedEmail) {
+            navController.navigate("home") {
+                popUpTo("login") { inclusive = true }
+            }
+        }
+        // Opcional: você pode retornar aqui para não exibir nada
+        return
+    }
+
     val userRepository = UserRepository(context)
     val companyRepository = CompanyRepository(context)
-    val prefs = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
 
     val email = loginViewModel.email.observeAsState("")
     val password = loginViewModel.password.observeAsState("")
@@ -40,11 +58,9 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
     val loginSuccess = loginViewModel.loginSuccess.observeAsState()
 
     loginSuccess.value?.let { result ->
+        Log.d("Result Type", "Result Type: ${result.type}")
         LaunchedEffect(result) {
-            prefs.edit()
-                .putString("loggedInEmail", result.email)
-                .putString("loginType", result.type)
-                .apply()
+            sessionManager.saveUserSession(result.email, result.type)
             navController.navigate("home") {
                 popUpTo("login") { inclusive = true }
             }
@@ -114,9 +130,7 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
             )
 
             Button(
-                onClick = {
-                    loginViewModel.login(userRepository, companyRepository)
-                },
+                onClick = { loginViewModel.login(userRepository, companyRepository) },
                 enabled = !isLoading.value,
                 modifier = Modifier
                     .fillMaxWidth()

@@ -1,7 +1,6 @@
 package com.grupo.appandroid.views
 
 import JobApplicationModal
-import android.content.Context
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -13,8 +12,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -33,9 +30,10 @@ import com.grupo.appandroid.R
 import com.grupo.appandroid.componentes.NavigationBar
 import com.grupo.appandroid.database.dao.AppDatabase
 import com.grupo.appandroid.database.repository.UserRepository
+import com.grupo.appandroid.factory.CandidatesViewModelFactory
 import com.grupo.appandroid.model.User
+import com.grupo.appandroid.utils.SessionManager
 import com.grupo.appandroid.viewmodels.CandidatesViewModel
-import com.grupo.appandroid.viewmodels.LoginViewModel
 
 @Composable
 fun UserDetailScreen(
@@ -44,30 +42,18 @@ fun UserDetailScreen(
     navController: NavController
 ) {
     val context = LocalContext.current
-    val prefs = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE)
-    val isCompanyLogin = prefs.getString("loginType", null) == "company"
+    val sessionManager = SessionManager(context)
     val database = AppDatabase.getDatabase(context)
+    val favoriteCandidateDao = database.favoriteCandidateDao()
 
-    val viewModel: CandidatesViewModel = viewModel(
-        viewModelStoreOwner = navController.getViewModelStoreOwner(navController.graph.id),
-    )
+    val companyCode = sessionManager.getLoggedInEmail()?.let { email ->
+        UserRepository(context).findUserByEmail(email)?.userCode.toString()
+    } ?: ""
 
     val isFavorite by remember(viewModel.favoriteCandidates) {
         derivedStateOf { viewModel.favoriteCandidates.contains(user.userCode.toString()) }
     }
 
-    val loginViewModel = LoginViewModel()
-
-
-    LaunchedEffect(Unit) {
-        val userCode = prefs.getString("loggedInEmail", null)?.let { email ->
-            UserRepository(context).findUserByEmail(email)?.userCode
-        }
-        if (userCode != null) {
-            viewModel.setUserCode(userCode.toString())
-            println("UserDetailScreen - Initial favoriteCandidates: ${viewModel.favoriteCandidates}")
-        }
-    }
 
     Column(
         modifier = Modifier
@@ -92,7 +78,7 @@ fun UserDetailScreen(
             }
 
             IconButton(
-                onClick = { viewModel.toggleFavorite(user.userCode.toString()) },
+                onClick = { viewModel.toggleFavoriteCandidate(user.userCode.toString()) },
                 modifier = Modifier.size(48.dp)
             ) {
                 val animatedSize by animateDpAsState(
@@ -191,7 +177,7 @@ fun UserDetailScreen(
             Spacer(modifier = Modifier.weight(1f))
 
             Button(
-                onClick = { viewModel.toggleFavorite(user.userCode.toString()) },
+                onClick = { viewModel.toggleFavoriteCandidate(user.userCode.toString()) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 16.dp),
@@ -208,9 +194,9 @@ fun UserDetailScreen(
         }
 
         NavigationBar(navController = navController)
-
     }
 }
+
 @Composable
 fun JobDetailScreen(
     jobId: String,
@@ -223,8 +209,11 @@ fun JobDetailScreen(
     viewModel: CandidatesViewModel
 ) {
     var showApplicationModal by remember { mutableStateOf(false) }
-    val loginViewModel = LoginViewModel()
+    // Se necessário, use o SessionManager para acessar dados da sessão
     val context = LocalContext.current
+    val sessionManager = SessionManager(context)
+    val loggedInEmail = sessionManager.getLoggedInEmail()
+    // Você pode utilizar o loggedInEmail para personalizar a tela se necessário
 
     Column(
         modifier = Modifier
@@ -306,7 +295,6 @@ fun JobDetailScreen(
         }
 
         NavigationBar(navController = navController)
-
     }
 
     JobApplicationModal(
@@ -335,3 +323,4 @@ private fun InfoItem(icon: String, label: String, value: String) {
         )
     }
 }
+
