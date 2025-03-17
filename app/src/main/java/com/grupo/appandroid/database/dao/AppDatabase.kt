@@ -67,21 +67,7 @@ abstract class AppDatabase : RoomDatabase() {
                 academyInstitution = "USP",
                 academyLastYear = "2018"
             ),
-            User(
-                userCode = 2L,
-                name = "Ana Clara",
-                phone = "21976543210",
-                email = "ana.clara@example.com",
-                password = "hashedPass456",
-                document = "987.654.321-00",
-                location = "Rio de Janeiro - RJ",
-                skills = "Designer UX/UI",
-                description = "3 anos",
-                academyLevel = "Graduação",
-                academyCourse = "Design Gráfico",
-                academyInstitution = "UFRJ",
-                academyLastYear = "2020"
-            ),
+
             User(
                 userCode = 3L,
                 name = "João Pedro",
