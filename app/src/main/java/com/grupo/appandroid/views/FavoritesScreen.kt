@@ -93,7 +93,7 @@ fun FavoritesScreen(
                 .padding(top = 36.dp),
             horizontalAlignment = Alignment.Start
         ) {
-            val titleText = if (isCompanyLogin) stringResource(R.string.not_found_email) else stringResource(R.string.not_found_email)
+            val titleText = if (isCompanyLogin) stringResource(R.string.candidates_favorites) else stringResource(R.string.jobs_favorites)
 
             Row(
                 modifier = Modifier
