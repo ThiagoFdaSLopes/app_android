@@ -41,7 +41,9 @@ fun NavigationBar(
             modifier = Modifier
                 .weight(1f)
                 .size(24.dp)
-                .clickable {  navController.navigate("PersonalProfileScreen")  }
+                .clickable {   navController.navigate(
+                    if (!isCompanyLogin) "PersonalProfileScreen" else "CompanyProfileScreen"
+                ) }
         )
         Icon(
             painter = painterResource(id = R.drawable.briefcase),
