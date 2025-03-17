@@ -41,31 +41,19 @@ fun UserDetailScreen(
     viewModel: CandidatesViewModel,
     navController: NavController
 ) {
-
     val context = LocalContext.current
-    // Retrieve the database instance (ensure this is how your AppDatabase is obtained)
-    val database = AppDatabase.getDatabase(context)
-    // Create your custom factory
-    val factory = CandidatesViewModelFactory(database)
-    // Obtain the CandidatesViewModel using the factory
-    val candidatesViewModel: CandidatesViewModel = viewModel(factory = factory)
-    // Utilize o SessionManager para obter os dados de sessão
     val sessionManager = SessionManager(context)
+    val database = AppDatabase.getDatabase(context)
+    val favoriteCandidateDao = database.favoriteCandidateDao()
 
-    val isFavorite by remember(candidatesViewModel.favoriteCandidates) {
-        derivedStateOf { candidatesViewModel.favoriteCandidates.contains(user.userCode.toString()) }
+    val companyCode = sessionManager.getLoggedInEmail()?.let { email ->
+        UserRepository(context).findUserByEmail(email)?.userCode.toString()
+    } ?: ""
+
+    val isFavorite by remember(viewModel.favoriteCandidates) {
+        derivedStateOf { viewModel.favoriteCandidates.contains(user.userCode.toString()) }
     }
 
-    LaunchedEffect(Unit) {
-        // Recupera o email a partir do SessionManager
-        val userCode = sessionManager.getLoggedInEmail()?.let { email ->
-            UserRepository(context).findUserByEmail(email)?.userCode
-        }
-        if (userCode != null) {
-            candidatesViewModel.setCompanyCode(userCode.toString())
-            println("UserDetailScreen - Initial favoriteCandidates: ${candidatesViewModel.favoriteCandidates}")
-        }
-    }
 
     Column(
         modifier = Modifier
@@ -90,7 +78,7 @@ fun UserDetailScreen(
             }
 
             IconButton(
-                onClick = { candidatesViewModel.toggleFavoriteCandidate(user.userCode.toString()) },
+                onClick = { viewModel.toggleFavoriteCandidate(user.userCode.toString()) },
                 modifier = Modifier.size(48.dp)
             ) {
                 val animatedSize by animateDpAsState(
@@ -189,7 +177,7 @@ fun UserDetailScreen(
             Spacer(modifier = Modifier.weight(1f))
 
             Button(
-                onClick = { candidatesViewModel.toggleFavoriteCandidate(user.userCode.toString()) },
+                onClick = { viewModel.toggleFavoriteCandidate(user.userCode.toString()) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 16.dp),

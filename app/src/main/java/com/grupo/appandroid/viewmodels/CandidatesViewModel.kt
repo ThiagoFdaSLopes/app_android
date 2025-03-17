@@ -60,7 +60,6 @@ class CandidatesViewModel(
             }
         }
     }
-
     fun toggleFavoriteCandidate(userCode: String) {
         viewModelScope.launch {
             try {
@@ -72,6 +71,7 @@ class CandidatesViewModel(
                     favoriteCandidateDao.insert(FavoriteCandidate(companyCode, userCode))
                     favoriteCandidates = favoriteCandidates + userCode
                 }
+                Log.d("CandidatesViewModel", "Toggled favorite for $userCode. New state: $favoriteCandidates")
             } catch (e: Exception) {
                 error = "Error toggling favorite candidate: ${e.message}"
             }

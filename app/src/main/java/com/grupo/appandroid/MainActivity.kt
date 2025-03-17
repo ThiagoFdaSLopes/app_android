@@ -69,13 +69,20 @@ class MainActivity : ComponentActivity() {
                     factory = CandidatesViewModelFactory(database)
                 )
 
-                // Se houver e-mail salvo, seta o código do usuário no CandidatesViewModel
                 LaunchedEffect(savedEmail) {
                     savedEmail?.let { email ->
-                        val userRepository = UserRepository(this@MainActivity)
-                        val user = userRepository.findUserByEmail(email)
-                        user?.userCode?.let { code ->
-                            candidatesViewModel.setCompanyCode(code.toString())
+                        if (sessionManager.isCompanyLogin()) {
+                            val companyRepository = CompanyRepository(this@MainActivity)
+                            val company = companyRepository.findByEmail(email)
+                            company?.companyCode?.let { code ->
+                                candidatesViewModel.setCompanyCode(code.toString())
+                            }
+                        } else {
+                            val userRepository = UserRepository(this@MainActivity)
+                            val user = userRepository.findUserByEmail(email)
+                            user?.userCode?.let { code ->
+                                candidatesViewModel.setCompanyCode(code.toString())
+                            }
                         }
                     }
                 }
