@@ -24,6 +24,28 @@
     <string name="have_an_account">Have an Account?</string>
     <string name="people">People</string>
     <string name="company">Company</string>
+    <string name="candidate">Candidate</string>
+    <string name="save_changes">Save Changes</string>
+    <string name="back">Back</string>
+    <string name="register_success">Register Success</string>
+    <string name="user_register">Register</string>
+    <string name="completed">Completed</string>
+    <string name="loading_jobs">Loading Jobs</string>
+    <string name="session_expired">Session Expired</string>
+    <string name="unknow_error">Error Unknown</string>
+    <string name="no_job_found">No found Jobs</string>
+    <string name="not_found">Not Found</string>
+    <string name="next">Next</string>
+    <string name="not_found_candidates">Not found candidates</string>
+    <string name="not_found_favorites_candidate">No favorite candidate</string>
+    <string name="not_found_email">Not Found E-mail</string>
+    <string name="candidates_favorites">Candidates Favorites</string>
+    <string name="jobs_favorites">Jobs Favorites</string>
+    <string name="aplication_candidature_sent">Application sent successfully!</string>
+    <string name="form_candidature">Forms Candidature</string>
+    <string name="sent_candidature">Sent</string>
+    <string name="add_favorite">Add Favorite</string>
+    <string name="remove_favorite">Remove Favorite</string>
     <!--  STRINGS DA TELA DE LOGIN  -->
     <string name="welcome_back">Welcome back!</string>
     <string name="forget_password">Forget your password? Click here</string>
@@ -32,7 +54,7 @@
     <!--  STRINGS DO COMPONENTE TOPHEADER  -->
     <string name="location_select">Location ▼</string>
     <string name="modality">Modality ▼</string>
-    <string name="search">Search...</string>
+    <string name="search">Search</string>
     <!--  STRINGS DO COMPONENTE CANDIDATECARD   -->
     <string name="see_more">See More</string>
     <string name="name_candidate_card">Name</string>

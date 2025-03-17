@@ -17,12 +17,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.grupo.appandroid.R
 import com.grupo.appandroid.componentes.NavigationBar
 import com.grupo.appandroid.components.JobCard
 import com.grupo.appandroid.components.CandidateCard
@@ -46,7 +48,7 @@ fun FavoritesScreen(
     val email = sessionManager.getLoggedInEmail()
     if (email.isNullOrEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(text = "Email não encontrado. Faça login.", color = TextWhite)
+            Text(text = stringResource(R.string.not_found_email), color = TextWhite)
         }
         return
     }
@@ -91,7 +93,7 @@ fun FavoritesScreen(
                 .padding(top = 36.dp),
             horizontalAlignment = Alignment.Start
         ) {
-            val titleText = if (isCompanyLogin) "Candidatos Favoritados" else "Vagas Favoritadas"
+            val titleText = if (isCompanyLogin) stringResource(R.string.not_found_email) else stringResource(R.string.not_found_email)
 
             Row(
                 modifier = Modifier
@@ -113,7 +115,7 @@ fun FavoritesScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Voltar",
+                        contentDescription = stringResource(R.string.back),
                         tint = Color.White
                     )
                 }
@@ -130,7 +132,7 @@ fun FavoritesScreen(
                 error != null -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
-                            text = error ?: "Erro desconhecido",
+                            text = error ?: stringResource(id = R.string.not_found),
                             color = TextWhite,
                             textAlign = TextAlign.Center
                         )
@@ -139,7 +141,7 @@ fun FavoritesScreen(
                 favoriteJobsDetails.isEmpty() && !isCompanyLogin -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
-                            text = "Nenhuma vaga favoritada",
+                            text = stringResource(id = R.string.not_found_candidates),
                             color = TextWhite,
                             textAlign = TextAlign.Center
                         )
@@ -148,7 +150,7 @@ fun FavoritesScreen(
                 favoriteCandidatesDetails.isEmpty() && isCompanyLogin -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
-                            text = "Nenhum candidato favoritado",
+                            text = stringResource(R.string.not_found_favorites_candidate),
                             color = TextWhite,
                             textAlign = TextAlign.Center
                         )
@@ -189,7 +191,6 @@ fun FavoritesList(
                     isFavorite = isFavorite,
                     onFavoriteClick = {
                         viewModel.toggleFavorite(job.id)
-                        println("Favorite clicked in FavoritesScreen for jobId: ${job.id}")
                     },
                     onClick = {
                         val encodedJobId = URLEncoder.encode(job.id, StandardCharsets.UTF_8.toString())
@@ -210,12 +211,11 @@ fun FavoritesList(
                     age = estimateAge(user.academyLastYear),
                     location = user.location,
                     area = user.academyCourse ?: user.skills,
-                    experienceTime = user.description ?: "Não especificado",
+                    experienceTime = user.description ?: stringResource(R.string.not_found),
                     isCompanyLogin = true,
                     isFavorite = isFavorite,
                     onFavoriteClick = {
                         viewModel.toggleFavoriteCandidate(user.userCode.toString())
-                        println("Favorite clicked in FavoritesScreen for userCode: ${user.userCode}")
                     },
                     onClick = {
                         navController.navigate("userDetail/${user.userCode}/${user.name}/${user.email}/${user.phone}/${user.location}/${user.skills}/${user.description}")
