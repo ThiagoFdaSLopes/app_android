@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -22,6 +23,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.grupo.appandroid.R
 import com.grupo.appandroid.componentes.NavigationBar
 import com.grupo.appandroid.components.JobCard
 import com.grupo.appandroid.components.LoadingIndicator
@@ -48,16 +50,11 @@ fun VagasScreen(
     val userRepository = UserRepository(context)
     val user = userRepository.findUserByEmail(email!!)
     val userCode = user?.userCode
-    println("CODIGO DO USUARIO")
-    println(userCode)
-    println(email)
-    println(isCompanyLogin)
-    println(user)
 
 
     if (email == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(text = "Sessão expirada. Faça login novamente.", color = Color.White)
+            Text(text = stringResource(id = R.string.session_expired), color = Color.White)
         }
         return
     }
@@ -65,7 +62,7 @@ fun VagasScreen(
     // Se o usuário for empresa, bloqueia o acesso, pois essa área é exclusiva para candidatos
     if (isCompanyLogin) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(text = "Esta área é exclusiva para candidatos.", color = Color.White)
+            Text(text = stringResource(id = R.string.session_expired), color = Color.White)
         }
         return
     }
@@ -122,7 +119,7 @@ fun VagasScreen(
                 viewModel.error != null -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
-                            text = viewModel.error ?: "Erro desconhecido",
+                            text = viewModel.error ?: stringResource(id = R.string.unknow_error),
                             color = Color.Red,
                             textAlign = TextAlign.Center
                         )
@@ -137,7 +134,7 @@ fun VagasScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Nenhuma vaga encontrada",
+                            text = stringResource(id = R.string.no_job_found),
                             color = Color.White,
                             fontSize = 16.sp,
                             textAlign = TextAlign.Center
@@ -186,7 +183,7 @@ fun VagasScreen(
                                 ) {
                                     Icon(
                                         Icons.Default.KeyboardArrowLeft,
-                                        contentDescription = "Anterior",
+                                        contentDescription = stringResource(id = R.string.back),
                                         tint = if (viewModel.currentPage > 1) Color.White else Color.Gray
                                     )
                                 }
@@ -205,7 +202,7 @@ fun VagasScreen(
                                 ) {
                                     Icon(
                                         Icons.Default.KeyboardArrowRight,
-                                        contentDescription = "Próxima",
+                                        contentDescription = stringResource(id = R.string.next),
                                         tint = if (viewModel.currentPage < viewModel.totalPages) Color.White else Color.Gray
                                     )
                                 }
@@ -226,7 +223,7 @@ fun VagasScreen(
         ) {
             Icon(
                 imageVector = Icons.Default.ArrowBack,
-                contentDescription = "Voltar",
+                contentDescription = stringResource(id = R.string.back),
                 tint = Color.White
             )
         }

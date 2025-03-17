@@ -118,9 +118,6 @@ fun LoginScreen(navController: NavController, loginViewModel: LoginViewModel) {
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
             }
-
-
-
             Button(
                 onClick = { loginViewModel.login(userRepository, companyRepository) },
                 enabled = !isLoading.value,

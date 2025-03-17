@@ -5,10 +5,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.grupo.appandroid.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -50,7 +52,7 @@ fun JobApplicationModal(
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
-                                "Candidatura enviada com sucesso!",
+                                stringResource(id = R.string.aplication_candidature_sent),
                                 color = Color.White,
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold
@@ -58,7 +60,7 @@ fun JobApplicationModal(
                         }
                     } else {
                         Text(
-                            "Formulário de Candidatura",
+                            stringResource(id = R.string.form_candidature),
                             color = Color.White,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
@@ -68,7 +70,7 @@ fun JobApplicationModal(
                         OutlinedTextField(
                             value = name,
                             onValueChange = { name = it },
-                            label = { Text("Nome Completo") },
+                            label = { Text(stringResource(id = R.string.fullName)) },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 8.dp),
@@ -78,7 +80,7 @@ fun JobApplicationModal(
                         OutlinedTextField(
                             value = email,
                             onValueChange = { email = it },
-                            label = { Text("Email") },
+                            label = { Text(stringResource(id = R.string.email)) },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 8.dp),
@@ -88,7 +90,7 @@ fun JobApplicationModal(
                         OutlinedTextField(
                             value = phone,
                             onValueChange = { phone = it },
-                            label = { Text("Telefone") },
+                            label = { Text(stringResource(id = R.string.phone)) },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 8.dp),
@@ -108,7 +110,7 @@ fun JobApplicationModal(
                                 .padding(top = 16.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = Color.White)
                         ) {
-                            Text("ENVIAR CANDIDATURA", color = Color.Black)
+                            Text(stringResource(id = R.string.sent_candidature), color = Color.Black)
                         }
                     }
                 }

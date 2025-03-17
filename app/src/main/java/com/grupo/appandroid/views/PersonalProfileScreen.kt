@@ -78,7 +78,7 @@ fun PersonalProfileScreen(user: User, navController: NavController) {
             )
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = "Candidate",
+                text = stringResource(id = R.string.candidate),
                 color = Color.White
             )
             Spacer(modifier = Modifier.height(10.dp))
@@ -145,7 +145,7 @@ fun PersonalProfileScreen(user: User, navController: NavController) {
                 shape = RoundedCornerShape(4.dp)
             ) {
                 Text(
-                    text = "Save Changes",
+                    text = stringResource(id = R.string.save_changes),
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
@@ -163,7 +163,7 @@ fun PersonalProfileScreen(user: User, navController: NavController) {
                 shape = RoundedCornerShape(4.dp)
             ) {
                 Text(
-                    text = "Voltar",
+                    text = stringResource(id = R.string.back),
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
@@ -172,9 +172,9 @@ fun PersonalProfileScreen(user: User, navController: NavController) {
                 onDismissRequest = {},
                 onConfirmation = { viewModel.showSuccess.value = false
                     navController.navigate("home") },
-                dialogText = "Registro Atualizado Com Sucesso",
-                dialogTitle = "Cadastro de Usuario",
-                textButton = "Concluir",
+                dialogText = stringResource(id = R.string.register_success),
+                dialogTitle = stringResource(id = R.string.user_register),
+                textButton = stringResource(id = R.string.completed),
                 showDialog = viewModel.showSuccess.value)
         }
     }

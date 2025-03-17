@@ -23,17 +23,39 @@
     <string name="sign_up">Registrar</string>
     <string name="sign_in">Logar</string>
     <string name="have_an_account">Você possui uma conta?</string>
+    <string name="loading_jobs">Carregando Vagas</string>
     <string name="people">Pessoa</string>
     <string name="company">Empresa</string>
+    <string name="candidate">Candidato</string>
+    <string name="save_changes">Salver Mudanças</string>
+    <string name="back">Voltar</string>
+    <string name="register_success">Registrado Com Sucesso</string>
+    <string name="user_register">Registro</string>
+    <string name="completed">Concluido</string>
+    <string name="session_expired">Sessão Expirada, Refaça Login</string>
+    <string name="unknow_error">Erro Desconhecido</string>
+    <string name="no_job_found">Nenhuma Vaga Encontrada</string>
+    <string name="not_found">Não Encontrado</string>
+    <string name="next">Próxima</string>
+    <string name="not_found_candidates">Não foi Encontrado Candidatos</string>
+    <string name="not_found_favorites_candidate">Nenhum Candidato Favorito</string>
+    <string name="not_found_email">E-mail Não Encontrado</string>
+    <string name="candidates_favorites">Candidatos Favoritos</string>
+    <string name="jobs_favorites">Vagas Favoritas</string>
+    <string name="aplication_candidature_sent">Candidatura enviada com sucesso!</string>
+    <string name="form_candidature">Formulário de Candidatura</string>
+    <string name="sent_candidature">Enviar Candidatura</string>
+    <string name="add_favorite">Adicionar Favoritos</string>
+    <string name="remove_favorite">Remover Favoritos</string>
     <!--  STRINGS DA TELA DE LOGIN  -->
-    <string name="welcome_back">Bem vindo de volta!</string>
+    <string name="welcome_back">Bem-vindo de volta!</string>
     <string name="forget_password">Esqueceu sua Senha? Clique aqui!</string>
     <string name="dont_have_account">Não tem uma conta? Cadastre-se</string>
     <string name="login">LOGIN</string>
     <!--  STRINGS DO COMPONENTE TopHeader  -->
     <string name="location_select">Localização ▼</string>
     <string name="modality">Modalidade ▼</string>
-    <string name="search">Pesquisar...</string>
+    <string name="search">Pesquisar</string>
     <!--  STRINGS DO COMPONENTE CandidateCard   -->
     <string name="see_more">Ver Mais</string>
     <string name="name_candidate_card">Nome</string>
