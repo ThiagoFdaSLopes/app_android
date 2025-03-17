@@ -75,7 +75,7 @@ fun PersonalProfileScreen(company: Company, navController: NavController) {
             )
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = "Candidate",
+                text = stringResource(id = R.string.company),
                 color = Color.White
             )
             Spacer(modifier = Modifier.height(10.dp))
@@ -142,7 +142,7 @@ fun PersonalProfileScreen(company: Company, navController: NavController) {
                 shape = RoundedCornerShape(4.dp)
             ) {
                 Text(
-                    text = "Save Changes",
+                    text = stringResource(id = R.string.save_changes),
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )

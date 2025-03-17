@@ -40,4 +40,19 @@
     <string name="age_candidate_card">Idade</string>
     <string name="area_candidate_card">Área</string>
     <string name="experience_candidate_card">Experiência</string>
+    <!-- STRINGS DA TELA CANDIDATES -->
+    <string name="no_user_found">Nenhum usuário encontrado</string>
+    <string name="no_vacancy_found">Nenhuma vaga encontrada</string>
+    <!-- STRINGS DA TELA DOS PERFIS -->
+    <string name="save_changes">SALVAR MUDANÇAS</string>
+    <string name="candidate">Candidato</string>
+    <!-- STRINGS DA TELA DETAILS -->
+    <string name="about">Sobre</string>
+    <string name="remove_from_favorites">Remover dos Favoritos</string>
+    <string name="favorite_candidate">Favoritar Candidato</string>
+    <string name="job_description">Descrição da Vaga</string>
+    <string name="apply">CANDIDATAR-SE</string>
+    <!-- STRINGS DA HOME -->
+    <string name="hello">Olá, </string>
+    <string name="message_email_not_found">Email não encontrado. Faça login.</string>
 </resources>

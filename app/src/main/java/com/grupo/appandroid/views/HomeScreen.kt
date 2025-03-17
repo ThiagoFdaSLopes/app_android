@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -48,7 +49,7 @@ fun HomeScreen(
     // Verifica se o email foi recuperado; caso contrário, exibe uma mensagem ou redireciona para o login
     if (email.isNullOrEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(text = "Email não encontrado. Faça login.", color = TextWhite)
+            Text(text = stringResource(id = R.string.message_email_not_found), color = TextWhite)
         }
         return
     }
@@ -59,9 +60,9 @@ fun HomeScreen(
     val isUser = !isCompanyLogin
     // Recupera o nome com um fallback, evitando o uso do operador !!
     val name = if (isUser) {
-        userRepository.findUserByEmail(email)?.name ?: "Usuário"
+        userRepository.findUserByEmail(email)?.name ?: stringResource(id = R.string.people)
     } else {
-        companyRepository.findByEmail(email)?.companyName ?: "Empresa"
+        companyRepository.findByEmail(email)?.companyName ?: stringResource(id = R.string.company)
     }
 
     Box(
@@ -83,7 +84,7 @@ fun HomeScreen(
                     .height(100.dp)
             ) {
                 Text(
-                    text = "Olá, $name",
+                    text = stringResource(id = R.string.hello) + "$name",
                     color = TextWhite,
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,

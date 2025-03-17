@@ -39,6 +39,21 @@
     <string name="age_candidate_card">Age</string>
     <string name="area_candidate_card">Area</string>
     <string name="experience_candidate_card">Experience</string>
+    <!-- STRINGS DA TELA CANDIDATES -->
+    <string name="no_user_found">No user found</string>
+    <string name="no_vacancy_found">No vacancy found</string>
+    <!-- STRINGS DA TELA DOS PERFIS -->
+    <string name="save_changes">SAVE CHANGES</string>
+    <string name="candidate">Candidate</string>
+    <!-- STRINGS DA TELA DETAILS -->
+    <string name="about">About</string>
+    <string name="remove_from_favorites">Remove From Favorites</string>
+    <string name="favorite_candidate">Favorite Candidate</string>
+    <string name="job_description">Job Description</string>
+    <string name="apply">APPLY</string>
+    <!-- STRINGS DA HOME -->
+    <string name="hello">Hello, </string>
+    <string name="message_email_not_found">Email not found. Sign in.</string>
 
 
 

@@ -145,7 +145,7 @@ fun PersonalProfileScreen(user: User, navController: NavController) {
                 shape = RoundedCornerShape(4.dp)
             ) {
                 Text(
-                    text = "Save Changes",
+                    text = stringResource(id = R.string.save_changes),
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
